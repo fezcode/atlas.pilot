@@ -262,7 +262,6 @@
                     <input type="text" id="keyboardInput" class="input-dark px-4 py-3 text-sm" placeholder="Type text...">
                     <button onclick="submitKeyboardText()" class="btn btn-primary px-6 rounded-xl"><i data-lucide="send" style="width: 16px; height: 16px;"></i></button>
                 </div>
-                
                 <div class="flex flex-col gap-3">
                     <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Navigation & Basic</span>
                     <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
@@ -278,7 +277,6 @@
                         <button onclick="pasteIntoWindow()" class="btn btn-primary py-3 text-xs font-bold gap-2" style="grid-column: span 2;"><i data-lucide="clipboard-paste" style="width: 12px; height: 12px;"></i> PASTE</button>
                     </div>
                 </div>
-
                 <div class="flex flex-col gap-3">
                     <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Shortcuts</span>
                     <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
@@ -292,7 +290,6 @@
                         <button onclick="sendHotkey('f4', ['alt'])" class="btn btn-danger py-2 text-[10px] font-bold">ALT+F4</button>
                     </div>
                 </div>
-
                 <div class="flex flex-col gap-3">
                     <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Function Keys</span>
                     <div class="grid" style="grid-template-columns: repeat(6, 1fr); gap: 0.4rem;">
@@ -321,7 +318,6 @@
                 <h3 id="manageModalTitle" class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Manage Window</h3>
                 <button onclick="closeManageModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
             </div>
-            
             <div class="flex flex-col gap-6">
                 <div class="flex flex-col gap-3">
                     <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Visibility & State</span>
@@ -331,7 +327,6 @@
                         <button onclick="minimizeWindow(currentHandle)" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--warning);">Minimize</button>
                     </div>
                 </div>
-
                 <div class="flex flex-col gap-3">
                     <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Layout & Display</span>
                     <div class="flex flex-col gap-2">
@@ -345,7 +340,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="pt-4 border-t border-zinc-800">
                     <button onclick="closeWindow(currentHandle); closeManageModal();" class="btn btn-danger w-full py-3 text-xs font-bold gap-2"><i data-lucide="x-circle" style="width: 14px; height: 14px;"></i> TERMINATE PROCESS</button>
                 </div>
@@ -360,7 +354,6 @@
                 <h3 class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Mouse Control</h3>
                 <button onclick="closeMouseModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
             </div>
-            
             <div class="flex flex-col gap-4">
                 <div id="trackpad" class="input-dark">SWIPE TO MOVE CURSOR</div>
                 <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
@@ -378,34 +371,47 @@
 
     <!-- System Modal -->
     <div id="systemModal" class="hidden modal-overlay">
-        <div class="glass-card w-full p-6 flex flex-col gap-6" style="max-width: 448px;">
+        <div class="glass-card w-full p-6 flex flex-col gap-6 relative overflow-hidden" style="max-width: 448px;">
             <div class="flex justify-between items-center">
                 <h3 class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">OS Control</h3>
                 <button onclick="closeSystemModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
             </div>
-            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <button onclick="systemAction('shutdown')" class="btn btn-danger py-8 flex flex-col gap-3">
+            
+            <div id="systemGrid" class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button onclick="requestAction('shutdown')" class="btn btn-danger py-8 flex flex-col gap-3">
                     <i data-lucide="power" style="width: 32px; height: 32px;"></i>
                     <span class="text-xs font-bold uppercase">Shutdown</span>
                 </button>
-                <button onclick="systemAction('restart')" class="btn btn-secondary py-8 flex flex-col gap-3" style="color: var(--warning); border-color: rgba(245, 158, 11, 0.2);">
+                <button onclick="requestAction('restart')" class="btn btn-secondary py-8 flex flex-col gap-3" style="color: var(--warning); border-color: rgba(245, 158, 11, 0.2);">
                     <i data-lucide="refresh-cw" style="width: 32px; height: 32px;"></i>
                     <span class="text-xs font-bold uppercase">Restart</span>
                 </button>
-                <button onclick="systemAction('sleep')" class="btn btn-secondary py-8 flex flex-col gap-3" style="color: #818cf8; border-color: rgba(129, 140, 248, 0.2);">
+                <button onclick="requestAction('sleep')" class="btn btn-secondary py-8 flex flex-col gap-3" style="color: #818cf8; border-color: rgba(129, 140, 248, 0.2);">
                     <i data-lucide="moon" style="width: 32px; height: 32px;"></i>
                     <span class="text-xs font-bold uppercase">Sleep</span>
                 </button>
-                <button onclick="systemAction('lock')" class="btn btn-secondary py-8 flex flex-col gap-3">
+                <button onclick="requestAction('lock')" class="btn btn-secondary py-8 flex flex-col gap-3">
                     <i data-lucide="lock" style="width: 32px; height: 32px;"></i>
                     <span class="text-xs font-bold uppercase">Lock PC</span>
                 </button>
+            </div>
+
+            <!-- Internal Confirmation Overlay -->
+            <div id="confirmOverlay" class="hidden absolute inset-0 bg-zinc-950/95 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200">
+                <h4 class="text-lg font-bold mb-2 uppercase tracking-tight text-white" id="confirmTitle">Confirm Action</h4>
+                <p class="text-sm text-zinc-400 mb-8" id="confirmText">Are you sure you want to proceed?</p>
+                <div class="flex w-full gap-4">
+                    <button onclick="cancelAction()" class="btn btn-secondary flex-grow py-4 uppercase tracking-widest text-xs">Cancel</button>
+                    <button onclick="executeAction()" class="btn btn-primary flex-grow py-4 uppercase tracking-widest text-xs" id="confirmBtn">Confirm</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         let currentHandle = null;
+        let pendingAction = null;
+
         async function refreshWindows() {
             const list = document.getElementById('windowList');
             try {
@@ -442,22 +448,42 @@
             } catch (error) { console.error(error); }
         }
 
+        // --- Modals ---
         function openKeyboardModal(handle, title) { currentHandle = handle; document.getElementById('keyboardModalTitle').innerText = title; document.getElementById('keyboardModal').classList.remove('hidden'); lucide.createIcons(); }
         function closeKeyboardModal() { document.getElementById('keyboardModal').classList.add('hidden'); currentHandle = null; }
         function openManageModal(handle, title) { currentHandle = handle; document.getElementById('manageModalTitle').innerText = title; document.getElementById('manageModal').classList.remove('hidden'); lucide.createIcons(); }
         function closeManageModal() { document.getElementById('manageModal').classList.add('hidden'); currentHandle = null; }
         function openMouseModal() { document.getElementById('mouseModal').classList.remove('hidden'); lucide.createIcons(); initTrackpad(); }
         function closeMouseModal() { document.getElementById('mouseModal').classList.add('hidden'); }
-        function openSystemModal() { document.getElementById('systemModal').classList.remove('hidden'); lucide.createIcons(); }
+        function openSystemModal() { document.getElementById('systemModal').classList.remove('hidden'); lucide.createIcons(); cancelAction(); }
         function closeSystemModal() { document.getElementById('systemModal').classList.add('hidden'); }
 
-        async function systemAction(action) {
-            let confirmed = (action === 'sleep' || action === 'lock') ? true : confirm(`Are you sure you want to ${action}?`);
-            if (!confirmed) return;
-            await fetch(`/api/${action}`, { method: 'POST' });
+        // --- System Actions with Internal Confirmation ---
+        function requestAction(action) {
+            pendingAction = action;
+            const overlay = document.getElementById('confirmOverlay');
+            const title = document.getElementById('confirmTitle');
+            const text = document.getElementById('confirmText');
+            const btn = document.getElementById('confirmBtn');
+            
+            title.innerText = `Confirm ${action.toUpperCase()}`;
+            text.innerText = `Are you absolutely sure you want to ${action} the computer?`;
+            
+            overlay.classList.remove('hidden');
+        }
+
+        function cancelAction() {
+            document.getElementById('confirmOverlay').classList.add('hidden');
+            pendingAction = null;
+        }
+
+        async function executeAction() {
+            if (!pendingAction) return;
+            await fetch(`/api/${pendingAction}`, { method: 'POST' });
             closeSystemModal();
         }
 
+        // --- Window Actions ---
         async function maximizeWindow(handle) { if(!handle) return; await fetch('/api/maximize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
         async function minimizeWindow(handle) { if(!handle) return; await fetch('/api/minimize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
         async function focusWindow(handle) { if(!handle) return; await fetch('/api/focus', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
