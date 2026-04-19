@@ -4,85 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atlas Window Controller</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/lucide.min.js"></script>
     <style>
+        :root {
+            --font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            --bg-color: #09090b;
+            --card-bg: rgba(24, 24, 27, 0.8);
+            --border-color: #27272a;
+            --text-main: #fafafa;
+            --text-muted: #a1a1aa;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * { box-sizing: border-box; }
         body {
-            background-color: #09090b;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: #fafafa;
+            background-color: var(--bg-color);
+            font-family: var(--font-main);
+            color: var(--text-main);
+            margin: 0; padding: 0;
             -webkit-tap-highlight-color: transparent;
+            line-height: 1.5;
+        }
+
+        .container { width: 100%; max-width: 1024px; margin: 0 auto; padding: 2rem 1rem; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
+        .gap-8 { gap: 2rem; }
+        .grid { display: grid; }
+        .w-full { width: 100%; }
+        .grow { flex-grow: 1; }
+        .shrink-0 { flex-shrink: 0; }
+        .hidden { display: none !important; }
+        .p-4 { padding: 1rem; }
+        .p-5 { padding: 1.25rem; }
+        .p-6 { padding: 1.5rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-10 { margin-bottom: 2.5rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .rounded-lg { border-radius: 8px; }
+        .rounded-xl { border-radius: 12px; }
+        .rounded-full { border-radius: 9999px; }
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .font-mono { font-family: monospace; }
+        .uppercase { text-transform: uppercase; }
+        .tracking-widest { letter-spacing: 0.1em; }
+        .tracking-tight { letter-spacing: -0.025em; }
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        @media (min-width: 1024px) {
+            .lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+            .lg\:col-span-5 { grid-column: span 5 / span 5; }
+            .lg\:col-span-7 { grid-column: span 7 / span 7; }
+            .md\:flex-row { flex-direction: row; }
         }
 
         .glass-card {
-            background: rgba(24, 24, 27, 0.8);
+            background: var(--card-bg);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(39, 39, 42, 1);
+            border: 1px solid var(--border-color);
             border-radius: 16px;
         }
 
+        .btn {
+            cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center;
+            font-weight: 700; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px; padding: 0.5rem 1rem;
+        }
         .btn-primary {
             background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); color: white;
         }
+        .btn-primary:active { transform: scale(0.96); box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2); }
+        .btn-secondary { background: #27272a; border: 1px solid #3f3f46; color: var(--text-main); }
+        .btn-secondary:active { background: #3f3f46; transform: scale(0.96); }
+        .btn-danger { background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.2); color: var(--danger); }
+        .btn-danger:active { background: rgba(220, 38, 38, 0.2); transform: scale(0.96); }
 
-        .btn-primary:active {
-            transform: scale(0.96);
-            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
+        .input-dark {
+            background: #18181b; border: 1px solid var(--border-color); color: var(--text-main);
+            border-radius: 10px; width: 100%;
         }
+        .input-dark:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
 
-        .btn-secondary {
-            background: rgba(39, 39, 42, 1);
-            border: 1px solid rgba(63, 63, 70, 1);
-            transition: all 0.2s;
-        }
-
-        .btn-secondary:active {
-            background: rgba(63, 63, 70, 1);
-            transform: scale(0.96);
-        }
-
-        .btn-danger {
-            background: rgba(220, 38, 38, 0.1);
-            border: 1px solid rgba(220, 38, 38, 0.2);
-            color: #ef4444;
-            transition: all 0.2s;
-        }
-
-        .btn-danger:active {
-            background: rgba(220, 38, 38, 0.2);
-            transform: scale(0.96);
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            height: 6px;
-            background: #27272a;
-            border-radius: 10px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #fafafa;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
+        input[type="range"] { -webkit-appearance: none; height: 6px; background: #27272a; border-radius: 10px; outline: none; width: 100%; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #fafafa; cursor: pointer; }
 
         .status-pulse {
-            width: 8px;
-            height: 8px;
-            background-color: #10b981;
-            border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            width: 8px; height: 8px; background-color: var(--success); border-radius: 50%;
             animation: pulse-green 2s infinite;
         }
-
         @keyframes pulse-green {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
             70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
@@ -90,77 +122,58 @@
         }
 
         .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
 
         .modal-overlay {
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-        }
-
-        .input-dark {
-            background: #18181b;
-            border: 1px solid #27272a;
-            color: #fafafa;
-            border-radius: 10px;
-        }
-
-        .input-dark:focus {
-            border-color: #6366f1;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+            z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem;
         }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-10 flex flex-col items-center">
-    <div class="w-full max-w-5xl">
+<body>
+    <div class="container">
         <header class="mb-10 flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-4">
-                <div class="p-3 glass-card bg-indigo-500/10 border-indigo-500/20">
-                    <i data-lucide="layout-dashboard" class="text-indigo-400 w-6 h-6"></i>
+                <div class="p-3 glass-card" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2);">
+                    <i data-lucide="layout-dashboard" style="color: #818cf8; width: 24px; height: 24px;"></i>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">Atlas Controller</h1>
-                    <div class="flex flex-wrap gap-2 mt-2">
+                    <h1 class="text-3xl font-bold tracking-tight">Atlas Controller</h1>
+                    <div class="flex gap-2 mt-2" style="flex-wrap: wrap;">
                         {{range .IPs}}
-                        <div class="flex items-center gap-2 px-2 py-1 rounded-full bg-zinc-900 border border-zinc-800">
+                        <div class="flex items-center gap-2 px-2 py-1 rounded-full" style="background: #18181b; border: 1px solid #27272a;">
                             <div class="status-pulse"></div>
-                            <span class="text-[10px] font-mono text-zinc-400">{{.}}:5000</span>
+                            <span class="text-xs font-mono" style="color: var(--text-muted);">{{.}}:5000</span>
                         </div>
                         {{end}}
                     </div>
                 </div>
             </div>
-            <button onclick="shutdownPC()" class="btn-danger flex items-center gap-2 px-6 py-3 font-bold text-sm rounded-xl">
-                <i data-lucide="power" class="w-4 h-4"></i>
-                Shutdown
+            <button onclick="shutdownPC()" class="btn btn-danger px-6 py-3 rounded-xl font-bold text-sm">
+                <i data-lucide="power" style="width: 16px; height: 16px; margin-right: 8px;"></i> Shutdown
             </button>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Controls Column -->
-            <div class="lg:col-span-5 space-y-8">
-                <section class="glass-card p-6 border-zinc-800/50">
+        <div class="grid lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-5 flex flex-col gap-8">
+                <section class="glass-card p-6">
                     <div class="flex items-center gap-2 mb-6">
-                        <i data-lucide="sliders" class="w-4 h-4 text-zinc-400"></i>
-                        <h2 class="text-sm font-bold text-zinc-400 uppercase tracking-widest">System Control</h2>
+                        <i data-lucide="sliders" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
+                        <h2 class="text-sm font-bold uppercase tracking-widest" style="color: var(--text-muted);">System Control</h2>
                     </div>
-                    <div class="space-y-8">
+                    <div class="flex flex-col gap-8">
                         <div>
                             <div class="flex justify-between mb-4">
-                                <span class="text-xs font-semibold text-zinc-500">SYSTEM VOLUME</span>
-                                <span id="volumeVal" class="text-xs font-bold text-indigo-400">50%</span>
+                                <span class="text-xs font-semibold" style="color: #71717a;">VOLUME</span>
+                                <span id="volumeVal" class="text-xs font-bold" style="color: var(--primary);">50%</span>
                             </div>
-                            <input type="range" min="0" max="100" value="50" oninput="document.getElementById('volumeVal').innerText = this.value + '%'" onchange="setVolume(this.value)" class="w-full">
+                            <input type="range" min="0" max="100" value="50" oninput="document.getElementById('volumeVal').innerText = this.value + '%'" onchange="setVolume(this.value)">
                         </div>
-                        
                         <div>
-                            <span class="text-xs font-semibold text-zinc-500 block mb-4 uppercase">Launch Application</span>
+                            <span class="text-xs font-semibold block mb-4 uppercase" style="color: #71717a;">Launch App</span>
                             <div class="flex gap-3">
-                                <input type="text" id="openCommand" placeholder="Command (e.g. chrome)" class="input-dark flex-grow px-4 py-3 text-sm">
-                                <button onclick="openApp()" class="btn-primary p-3 rounded-xl">
-                                    <i data-lucide="play" class="w-5 h-5 fill-current"></i>
-                                </button>
+                                <input type="text" id="openCommand" placeholder="Command..." class="input-dark px-4 py-3 text-sm">
+                                <button onclick="openApp()" class="btn btn-primary rounded-xl" style="padding: 0.75rem;"><i data-lucide="play" style="width: 20px; height: 20px;"></i></button>
                             </div>
                         </div>
                     </div>
@@ -168,89 +181,68 @@
 
                 <section class="glass-card p-6">
                     <div class="flex items-center gap-2 mb-6">
-                        <i data-lucide="clipboard" class="w-4 h-4 text-zinc-400"></i>
-                        <h2 class="text-sm font-bold text-zinc-400 uppercase tracking-widest">Clipboard</h2>
+                        <i data-lucide="clipboard" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
+                        <h2 class="text-sm font-bold uppercase tracking-widest" style="color: var(--text-muted);">Clipboard</h2>
                     </div>
-                    <div class="space-y-4">
-                        <textarea id="clipboardArea" rows="4" class="input-dark w-full p-4 text-sm focus:outline-none resize-none custom-scroll" placeholder="Text to sync..."></textarea>
+                    <div class="flex flex-col gap-4">
+                        <textarea id="clipboardArea" rows="4" class="input-dark p-4 text-sm focus:outline-none resize-none custom-scroll" placeholder="Text to sync..."></textarea>
                         <div class="flex gap-3">
-                            <button onclick="getClipboard()" class="btn-secondary flex-grow py-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2">
-                                <i data-lucide="download" class="w-3 h-3"></i> PULL
-                            </button>
-                            <button onclick="setClipboard()" class="btn-primary flex-grow py-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2">
-                                <i data-lucide="upload" class="w-3 h-3"></i> PUSH
-                            </button>
+                            <button onclick="getClipboard()" class="btn btn-secondary grow py-3 text-xs font-bold rounded-xl gap-2"><i data-lucide="download" style="width: 12px; height: 12px;"></i> PULL</button>
+                            <button onclick="setClipboard()" class="btn btn-primary grow py-3 text-xs font-bold rounded-xl gap-2"><i data-lucide="upload" style="width: 12px; height: 12px;"></i> PUSH</button>
                         </div>
                     </div>
                 </section>
             </div>
 
-            <!-- Windows Column -->
             <section class="lg:col-span-7 glass-card p-6 flex flex-col">
                 <div class="flex justify-between items-center mb-6">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="monitor" class="w-4 h-4 text-zinc-400"></i>
-                        <h2 class="text-sm font-bold text-zinc-400 uppercase tracking-widest">Active Windows</h2>
+                        <i data-lucide="monitor" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
+                        <h2 class="text-sm font-bold uppercase tracking-widest" style="color: var(--text-muted);">Active Windows</h2>
                     </div>
-                    <button onclick="refreshWindows()" class="btn-secondary p-2 rounded-lg">
-                        <i data-lucide="refresh-cw" class="w-4 h-4 text-zinc-400"></i>
-                    </button>
+                    <button onclick="refreshWindows()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i></button>
                 </div>
-                <div id="windowList" class="space-y-4 overflow-y-auto max-h-[600px] pr-2 custom-scroll">
-                    <p class="text-center py-20 text-zinc-600 italic">Loading active windows...</p>
+                <div id="windowList" class="flex flex-col gap-4 overflow-y-auto custom-scroll" style="max-height: 600px; padding-right: 0.5rem;">
+                    <p class="text-center py-20 text-sm italic" style="color: #52525b;">Loading active windows...</p>
                 </div>
             </section>
         </div>
     </div>
 
-    <!-- Screenshot Modal -->
-    <div id="screenshotModal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50">
-        <div class="glass-card w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div class="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
-                <h3 id="modalTitle" class="font-bold text-zinc-200 truncate">Screenshot</h3>
-                <button onclick="closeScreenshotModal()" class="btn-secondary p-2 rounded-lg hover:text-red-500">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+    <div id="screenshotModal" class="hidden modal-overlay">
+        <div class="glass-card w-full flex flex-col" style="max-width: 1024px; max-height: 90vh; overflow: hidden;">
+            <div class="p-4 flex justify-between items-center bg-zinc-900/50" style="border-bottom: 1px solid var(--border-color);">
+                <h3 id="modalTitle" class="font-bold" style="color: #e4e4e7; margin: 0;">Screenshot</h3>
+                <button onclick="closeScreenshotModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 20px; height: 20px;"></i></button>
             </div>
-            <div class="overflow-auto p-4 bg-black/40">
-                <img id="screenshotImg" src="" alt="Screenshot" class="max-w-full h-auto mx-auto rounded-lg shadow-2xl border border-zinc-800">
+            <div class="grow overflow-auto p-4" style="background: rgba(0,0,0,0.4);">
+                <img id="screenshotImg" src="" alt="Screenshot" class="w-full" style="height: auto; border-radius: 8px;">
             </div>
         </div>
     </div>
 
-    <!-- Keyboard Modal -->
-    <div id="keyboardModal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50">
-        <div class="glass-card w-full max-w-md p-6 space-y-6 shadow-2xl">
+    <div id="keyboardModal" class="hidden modal-overlay">
+        <div class="glass-card w-full p-6 flex flex-col gap-6" style="max-width: 448px;">
             <div class="flex justify-between items-center">
-                <h3 id="keyboardModalTitle" class="font-bold text-zinc-200 truncate uppercase tracking-wider text-sm">Keyboard Input</h3>
-                <button onclick="closeKeyboardModal()" class="btn-secondary p-2 rounded-lg hover:text-red-500">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
+                <h3 id="keyboardModalTitle" class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Keyboard</h3>
+                <button onclick="closeKeyboardModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
             </div>
-            
-            <div class="space-y-6">
+            <div class="flex flex-col gap-6">
                 <div class="flex gap-2">
-                    <input type="text" id="keyboardInput" class="input-dark flex-grow px-4 py-3 text-sm" placeholder="Message...">
-                    <button onclick="submitKeyboardText()" class="btn-primary px-6 rounded-xl">
-                        <i data-lucide="send" class="w-4 h-4"></i>
-                    </button>
+                    <input type="text" id="keyboardInput" class="input-dark px-4 py-3 text-sm" placeholder="Type text...">
+                    <button onclick="submitKeyboardText()" class="btn btn-primary px-6 rounded-xl"><i data-lucide="send" style="width: 16px; height: 16px;"></i></button>
                 </div>
-                
-                <div class="grid grid-cols-4 gap-3">
-                    <button onclick="sendKey('enter')" class="btn-secondary py-3 text-[10px] font-bold text-indigo-400">ENTER</button>
-                    <button onclick="sendKey('backspace')" class="btn-secondary py-3 text-[10px] font-bold">BS</button>
-                    <button onclick="sendKey('tab')" class="btn-secondary py-3 text-[10px] font-bold">TAB</button>
-                    <button onclick="sendKey('escape')" class="btn-secondary py-3 text-[10px] font-bold">ESC</button>
-                    <button onclick="sendKey('up')" class="btn-secondary py-3"><i data-lucide="chevron-up" class="w-4 h-4 mx-auto"></i></button>
-                    <button onclick="sendKey('down')" class="btn-secondary py-3"><i data-lucide="chevron-down" class="w-4 h-4 mx-auto"></i></button>
-                    <button onclick="sendKey('left')" class="btn-secondary py-3"><i data-lucide="chevron-left" class="w-4 h-4 mx-auto"></i></button>
-                    <button onclick="sendKey('right')" class="btn-secondary py-3"><i data-lucide="chevron-right" class="w-4 h-4 mx-auto"></i></button>
-                    <button onclick="sendKey('space')" class="btn-secondary py-3 text-[10px] font-bold col-span-2">SPACE</button>
-                    <button onclick="pasteIntoWindow()" class="btn-primary py-3 text-[10px] font-bold col-span-2 flex items-center justify-center gap-2">
-                        <i data-lucide="clipboard-paste" class="w-3 h-3"></i> PASTE CLIPBOARD
-                    </button>
-                    <button onclick="sendKey('f5')" class="btn-secondary py-3 text-[10px] font-bold">F5</button>
-                    <button onclick="sendKey('win')" class="btn-secondary py-3 text-[10px] font-bold"><i data-lucide="clover" class="w-4 h-4 mx-auto"></i></button>
+                <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
+                    <button onclick="sendKey('enter')" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--primary);">ENTER</button>
+                    <button onclick="sendKey('backspace')" class="btn btn-secondary py-3 text-xs font-bold">BS</button>
+                    <button onclick="sendKey('tab')" class="btn btn-secondary py-3 text-xs font-bold">TAB</button>
+                    <button onclick="sendKey('escape')" class="btn btn-secondary py-3 text-xs font-bold">ESC</button>
+                    <button onclick="sendKey('up')" class="btn btn-secondary py-3"><i data-lucide="chevron-up" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
+                    <button onclick="sendKey('down')" class="btn btn-secondary py-3"><i data-lucide="chevron-down" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
+                    <button onclick="sendKey('left')" class="btn btn-secondary py-3"><i data-lucide="chevron-left" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
+                    <button onclick="sendKey('right')" class="btn btn-secondary py-3"><i data-lucide="chevron-right" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
+                    <button onclick="sendKey('space')" class="btn btn-secondary py-3 text-xs font-bold" style="grid-column: span 2;">SPACE</button>
+                    <button onclick="pasteIntoWindow()" class="btn btn-primary py-3 text-xs font-bold gap-2" style="grid-column: span 2;"><i data-lucide="clipboard-paste" style="width: 12px; height: 12px;"></i> PASTE</button>
                 </div>
             </div>
         </div>
@@ -258,201 +250,77 @@
 
     <script>
         let currentHandle = null;
-
         async function refreshWindows() {
             const list = document.getElementById('windowList');
             try {
                 const response = await fetch('/api/windows');
                 const windows = await response.json();
-                
                 if (windows.length === 0) {
-                    list.innerHTML = '<div class="text-center py-20 text-zinc-600"><i data-lucide="monitor-off" class="w-12 h-12 mx-auto mb-4 opacity-20"></i><p class="text-sm">No active windows found</p></div>';
-                    lucide.createIcons();
-                    return;
+                    list.innerHTML = `<div style="text-align: center; padding: 5rem 0; color: #3f3f46;"><i data-lucide="monitor-off" style="width: 48px; height: 48px; opacity: 0.2; margin-bottom: 1rem;"></i><p class="text-sm">No active windows</p></div>`;
+                    lucide.createIcons(); return;
                 }
-
-                windows.sort((a, b) => {
-                    if (a.controllable && !b.controllable) return -1;
-                    if (!a.controllable && b.controllable) return 1;
-                    return a.title.localeCompare(b.title);
-                });
-
+                windows.sort((a, b) => (a.controllable === b.controllable) ? a.title.localeCompare(b.title) : (a.controllable ? -1 : 1));
                 list.innerHTML = windows.map(win => `
-                    <div class="glass-card p-5 group hover:border-zinc-700 transition-all duration-300">
+                    <div class="glass-card p-5" style="border-color: rgba(39, 39, 42, 0.5);">
                         <div class="flex flex-col gap-5">
                             <div class="flex items-center justify-between gap-4">
-                                <div class="flex items-center min-w-0 flex-grow">
-                                    <div class="w-2 h-2 rounded-full mr-3 shrink-0 ${win.controllable ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-zinc-700'}"></div>
-                                    <span class="font-bold text-zinc-100 truncate text-xs uppercase tracking-wide" title="${win.title}">${win.title}</span>
+                                <div class="flex items-center min-w-0 grow">
+                                    <div class="status-pulse shrink-0" style="width: 8px; height: 8px; margin-right: 0.75rem; background: ${win.controllable ? 'var(--success)' : '#3f3f46'};"></div>
+                                    <span class="font-bold truncate text-xs uppercase tracking-wide" style="color: #f4f4f5;">${win.title}</span>
                                 </div>
-                                <button onclick="closeWindow('${win.handle}')" class="text-zinc-600 hover:text-red-500 transition-colors">
-                                    <i data-lucide="x-circle" class="w-5 h-5"></i>
-                                </button>
+                                <button onclick="closeWindow('${win.handle}')" style="background:none;border:none;cursor:pointer;color:#52525b;"><i data-lucide="x-circle" style="width: 20px; height: 20px;"></i></button>
                             </div>
-                            
                             ${win.controllable ? `
                             <div class="flex flex-col gap-4">
-                                <div class="flex flex-wrap gap-2">
-                                    <button onclick="focusWindow('${win.handle}')" class="btn-secondary px-4 py-2 text-[9px] font-black uppercase tracking-widest text-indigo-400">Focus</button>
-                                    <button onclick="openKeyboardModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn-secondary px-4 py-2 text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
-                                        <i data-lucide="keyboard" class="w-3 h-3"></i> Type
-                                    </button>
-                                    <button onclick="quickPaste('${win.handle}')" class="btn-secondary px-4 py-2 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 text-emerald-400">
-                                        <i data-lucide="clipboard-paste" class="w-3 h-3"></i> Paste
-                                    </button>
-                                    <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn-secondary px-4 py-2 text-[9px] font-black uppercase tracking-widest text-emerald-400">Snap</button>
-                                    <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="btn-secondary px-4 py-2 text-[9px] font-black uppercase tracking-widest text-orange-400">Move</button>
+                                <div class="flex gap-2" style="flex-wrap: wrap;">
+                                    <button onclick="focusWindow('${win.handle}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest" style="font-size: 9px; color: #818cf8;">Focus</button>
+                                    <button onclick="openKeyboardModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest gap-2" style="font-size: 9px;"><i data-lucide="keyboard" style="width: 12px; height: 12px;"></i> Type</button>
+                                    <button onclick="quickPaste('${win.handle}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest gap-2" style="font-size: 9px; color: var(--success);"><i data-lucide="clipboard-paste" style="width: 12px; height: 12px;"></i> Paste</button>
+                                    <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest" style="font-size: 9px; color: var(--success);">Snap</button>
+                                    <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest" style="font-size: 9px; color: var(--warning);">Move</button>
                                 </div>
-                                <div class="flex gap-2 p-1 bg-black/20 rounded-xl justify-center">
-                                    <button onclick="snapWindow('${win.handle}', 'top-left')" class="p-2 hover:text-white text-zinc-500" title="Top Left"><i data-lucide="arrow-up-left" class="w-4 h-4"></i></button>
-                                    <button onclick="snapWindow('${win.handle}', 'top-right')" class="p-2 hover:text-white text-zinc-500" title="Top Right"><i data-lucide="arrow-up-right" class="w-4 h-4"></i></button>
-                                    <button onclick="snapWindow('${win.handle}', 'bottom-left')" class="p-2 hover:text-white text-zinc-500" title="Bottom Left"><i data-lucide="arrow-down-left" class="w-4 h-4"></i></button>
-                                    <button onclick="snapWindow('${win.handle}', 'bottom-right')" class="p-2 hover:text-white text-zinc-500" title="Bottom Right"><i data-lucide="arrow-down-right" class="w-4 h-4"></i></button>
-                                    <button onclick="snapWindow('${win.handle}', 'full')" class="p-2 hover:text-white text-zinc-500" title="Fullscreen"><i data-lucide="maximize" class="w-4 h-4"></i></button>
+                                <div class="flex gap-2 p-1 rounded-xl justify-center" style="background: rgba(0,0,0,0.2);">
+                                    <button onclick="snapWindow('${win.handle}', 'top-left')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-up-left" style="width: 16px; height: 16px; color: #71717a;"></i></button>
+                                    <button onclick="snapWindow('${win.handle}', 'top-right')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-up-right" style="width: 16px; height: 16px; color: #71717a;"></i></button>
+                                    <button onclick="snapWindow('${win.handle}', 'bottom-left')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-down-left" style="width: 16px; height: 16px; color: #71717a;"></i></button>
+                                    <button onclick="snapWindow('${win.handle}', 'bottom-right')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-down-right" style="width: 16px; height: 16px; color: #71717a;"></i></button>
+                                    <button onclick="snapWindow('${win.handle}', 'full')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="maximize" style="width: 16px; height: 16px; color: #71717a;"></i></button>
                                 </div>
-                            </div>
-                            ` : ''}
+                            </div>` : ''}
                         </div>
                     </div>
                 `).join('');
                 lucide.createIcons();
-            } catch (error) {
-                list.innerHTML = '<div class="text-red-500/50 text-center py-10 text-xs font-bold uppercase tracking-widest">Connection Lost</div>';
-            }
+            } catch (error) { console.error(error); }
         }
 
-        function openKeyboardModal(handle, title) {
-            currentHandle = handle;
-            document.getElementById('keyboardModalTitle').innerText = title;
-            document.getElementById('keyboardModal').classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function closeKeyboardModal() {
-            document.getElementById('keyboardModal').classList.add('hidden');
-            currentHandle = null;
-        }
-
+        function openKeyboardModal(handle, title) { currentHandle = handle; document.getElementById('keyboardModalTitle').innerText = title; document.getElementById('keyboardModal').classList.remove('hidden'); lucide.createIcons(); }
+        function closeKeyboardModal() { document.getElementById('keyboardModal').classList.add('hidden'); currentHandle = null; }
         async function submitKeyboardText() {
             const input = document.getElementById('keyboardInput');
             if (!input.value || !currentHandle) return;
-            await fetch('/api/type', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ handle: currentHandle, text: input.value })
-            });
+            await fetch('/api/type', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle, text: input.value }) });
             input.value = '';
         }
-
-        async function sendKey(key) {
-            if (!currentHandle) return;
-            await fetch('/api/key', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ handle: currentHandle, key })
-            });
-        }
-
-        async function pasteIntoWindow() {
-            if (!currentHandle) return;
-            // First, push current textarea content to PC clipboard
-            await setClipboard();
-            // Then trigger paste
-            await fetch('/api/paste', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ handle: currentHandle })
-            });
-        }
-
-        async function quickPaste(handle) {
-            currentHandle = handle;
-            await pasteIntoWindow();
-            currentHandle = null;
-        }
-
+        async function sendKey(key) { if (!currentHandle) return; await fetch('/api/key', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle, key }) }); }
+        async function pasteIntoWindow() { if (!currentHandle) return; await setClipboard(); await fetch('/api/paste', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle }) }); }
+        async function quickPaste(handle) { currentHandle = handle; await pasteIntoWindow(); currentHandle = null; }
         async function takeScreenshot(handle, title) {
             const img = document.getElementById('screenshotImg');
             const modal = document.getElementById('screenshotModal');
             document.getElementById('modalTitle').innerText = title;
             img.src = `/api/screenshot?handle=${handle}&t=${Date.now()}`;
             modal.classList.remove('hidden');
-            lucide.createIcons();
         }
-
-        function closeScreenshotModal() {
-            document.getElementById('screenshotModal').classList.add('hidden');
-        }
-
-        async function focusWindow(handle) {
-            await fetch('/api/focus', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ handle })
-            });
-        }
-
-        async function snapWindow(handle, position) {
-            await fetch('/api/snap', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ handle, position })
-            });
-            if (position === 'next-monitor') setTimeout(refreshWindows, 500);
-        }
-
-        async function closeWindow(handle) {
-            if (confirm('Terminate window?')) {
-                await fetch('/api/close', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ handle })
-                });
-                setTimeout(refreshWindows, 500);
-            }
-        }
-
-        async function getClipboard() {
-            try {
-                const res = await fetch('/api/clipboard/get');
-                const data = await res.json();
-                document.getElementById('clipboardArea').value = data.text;
-            } catch (e) { console.error(e); }
-        }
-
-        async function setClipboard() {
-            await fetch('/api/clipboard/set', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ text: document.getElementById('clipboardArea').value })
-            });
-        }
-
-        async function openApp() {
-            const cmd = document.getElementById('openCommand').value;
-            if (!cmd) return;
-            await fetch('/api/open', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ command: cmd })
-            });
-            document.getElementById('openCommand').value = '';
-            setTimeout(refreshWindows, 1000);
-        }
-
-        async function setVolume(level) {
-            await fetch('/api/volume', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ level: parseInt(level) })
-            });
-        }
-
-        async function shutdownPC() {
-            if (confirm('Initiate system shutdown?')) {
-                await fetch('/api/shutdown', { method: 'POST' });
-            }
-        }
+        function closeScreenshotModal() { document.getElementById('screenshotModal').classList.add('hidden'); }
+        async function focusWindow(handle) { await fetch('/api/focus', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
+        async function snapWindow(handle, position) { await fetch('/api/snap', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle, position }) }); if (position === 'next-monitor') setTimeout(refreshWindows, 500); }
+        async function closeWindow(handle) { if (confirm('Terminate window?')) { await fetch('/api/close', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); setTimeout(refreshWindows, 500); } }
+        async function getClipboard() { try { const res = await fetch('/api/clipboard/get'); const data = await res.json(); document.getElementById('clipboardArea').value = data.text; } catch (e) { console.error(e); } }
+        async function setClipboard() { await fetch('/api/clipboard/set', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ text: document.getElementById('clipboardArea').value }) }); }
+        async function openApp() { const cmd = document.getElementById('openCommand').value; if (!cmd) return; await fetch('/api/open', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ command: cmd }) }); document.getElementById('openCommand').value = ''; setTimeout(refreshWindows, 1000); }
+        async function setVolume(level) { await fetch('/api/volume', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ level: parseInt(level) }) }); }
+        async function shutdownPC() { if (confirm('Shutdown system?')) { await fetch('/api/shutdown', { method: 'POST' }); } }
 
         refreshWindows();
         lucide.createIcons();

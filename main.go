@@ -68,6 +68,9 @@ func main() {
 	http.HandleFunc("/api/screenshot", handleScreenshot)
 	http.HandleFunc("/api/paste", handlePaste)
 
+	// Serve static files from embedded FS
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(templatesFS))))
+
 	port := "5000"
 	ips := getLocalIPs()
 	fmt.Printf("Server starting at:\n")
