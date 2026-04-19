@@ -99,6 +99,7 @@
             cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center;
             font-weight: 700; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 12px; padding: 0.5rem 1rem; text-decoration: none;
+            user-select: none;
         }
         .btn-primary {
             background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
@@ -136,6 +137,23 @@
             position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
             z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem;
         }
+
+        /* Mouse Specific */
+        #trackpad {
+            touch-action: none;
+            background: rgba(0,0,0,0.3);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -157,9 +175,14 @@
                     </div>
                 </div>
             </div>
-            <button onclick="shutdownPC()" class="btn btn-danger px-6 py-3 rounded-xl font-bold text-sm">
-                <i data-lucide="power" style="width: 16px; height: 16px; margin-right: 8px;"></i> Shutdown
-            </button>
+            <div class="flex gap-3">
+                <button onclick="openMouseModal()" class="btn btn-secondary px-6 py-3 rounded-xl font-bold text-sm">
+                    <i data-lucide="mouse-pointer-2" style="width: 16px; height: 16px; margin-right: 8px;"></i> Mouse
+                </button>
+                <button onclick="shutdownPC()" class="btn btn-danger px-6 py-3 rounded-xl font-bold text-sm">
+                    <i data-lucide="power" style="width: 16px; height: 16px; margin-right: 8px;"></i> Shutdown
+                </button>
+            </div>
         </header>
 
         <div class="grid lg:grid-cols-12 gap-8">
@@ -217,7 +240,7 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Screenshot Modal -->
     <div id="screenshotModal" class="hidden modal-overlay">
         <div class="glass-card w-full flex flex-col" style="max-width: 1024px; max-height: 90vh; overflow: hidden;">
             <div class="p-4 flex justify-between items-center bg-zinc-900/50" style="border-bottom: 1px solid var(--border-color);">
@@ -329,6 +352,29 @@
         </div>
     </div>
 
+    <!-- Mouse Control Modal -->
+    <div id="mouseModal" class="hidden modal-overlay">
+        <div class="glass-card w-full p-6 flex flex-col gap-6" style="max-width: 448px;">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Mouse Control</h3>
+                <button onclick="closeMouseModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
+            </div>
+            
+            <div class="flex flex-col gap-4">
+                <div id="trackpad" class="input-dark">SWIPE TO MOVE CURSOR</div>
+                <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+                    <button onclick="mouseClick('left')" class="btn btn-secondary py-6 text-xs font-bold">LEFT</button>
+                    <button onclick="mouseClick('center')" class="btn btn-secondary py-6 text-xs font-bold">MID</button>
+                    <button onclick="mouseClick('right')" class="btn btn-secondary py-6 text-xs font-bold">RIGHT</button>
+                </div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <button onclick="mouseScroll(0, 5)" class="btn btn-secondary py-4 text-xs font-bold gap-2"><i data-lucide="chevron-up"></i> SCROLL UP</button>
+                    <button onclick="mouseScroll(0, -5)" class="btn btn-secondary py-4 text-xs font-bold gap-2"><i data-lucide="chevron-down"></i> SCROLL DOWN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentHandle = null;
         async function refreshWindows() {
@@ -371,45 +417,44 @@
         function closeKeyboardModal() { document.getElementById('keyboardModal').classList.add('hidden'); currentHandle = null; }
         function openManageModal(handle, title) { currentHandle = handle; document.getElementById('manageModalTitle').innerText = title; document.getElementById('manageModal').classList.remove('hidden'); lucide.createIcons(); }
         function closeManageModal() { document.getElementById('manageModal').classList.add('hidden'); currentHandle = null; }
+        function openMouseModal() { document.getElementById('mouseModal').classList.remove('hidden'); lucide.createIcons(); initTrackpad(); }
+        function closeMouseModal() { document.getElementById('mouseModal').classList.add('hidden'); }
 
         async function maximizeWindow(handle) { if(!handle) return; await fetch('/api/maximize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
         async function minimizeWindow(handle) { if(!handle) return; await fetch('/api/minimize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
-
-        async function submitKeyboardText() {
-            const input = document.getElementById('keyboardInput');
-            if (!input.value || !currentHandle) return;
-            await fetch('/api/type', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle, text: input.value }) });
-            input.value = '';
-        }
-        async function sendKey(key) { if (!currentHandle) return; await fetch('/api/key', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle, key }) }); }
-        
-        async function sendHotkey(key, modifiers) {
-            if (!currentHandle) return;
-            await fetch('/api/hotkey', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ handle: currentHandle, key, modifiers })
-            });
-        }
-
-        async function pasteIntoWindow() { if (!currentHandle) return; await setClipboard(); await fetch('/api/paste', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle }) }); }
-        async function quickPaste(handle) { currentHandle = handle; await pasteIntoWindow(); currentHandle = null; }
-        async function takeScreenshot(handle, title) {
-            const img = document.getElementById('screenshotImg');
-            const modal = document.getElementById('screenshotModal');
-            document.getElementById('modalTitle').innerText = title;
-            img.src = `/api/screenshot?handle=${handle}&t=${Date.now()}`;
-            modal.classList.remove('hidden');
-        }
-        function closeScreenshotModal() { document.getElementById('screenshotModal').classList.add('hidden'); }
         async function focusWindow(handle) { if(!handle) return; await fetch('/api/focus', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
         async function snapWindow(handle, position) { if(!handle) return; await fetch('/api/snap', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle, position }) }); if (position === 'next-monitor') setTimeout(refreshWindows, 500); }
-        async function closeWindow(handle) { if(!handle) return; if (confirm('Terminate window?')) { await fetch('/api/close', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); setTimeout(refreshWindows, 500); } }
+        async function closeWindow(handle) { if(!handle) return; if (confirm('Terminate?')) { await fetch('/api/close', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); setTimeout(refreshWindows, 500); } }
+        async function submitKeyboardText() { const input = document.getElementById('keyboardInput'); if (!input.value || !currentHandle) return; await fetch('/api/type', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle, text: input.value }) }); input.value = ''; }
+        async function sendKey(key) { await fetch('/api/key', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle || "", key }) }); }
+        async function sendHotkey(key, modifiers) { await fetch('/api/hotkey', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle || "", key, modifiers }) }); }
+        async function pasteIntoWindow() { if (!currentHandle) return; await setClipboard(); await fetch('/api/paste', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle }) }); }
+        async function quickPaste(handle) { currentHandle = handle; await pasteIntoWindow(); currentHandle = null; }
+
+        function initTrackpad() {
+            const pad = document.getElementById('trackpad');
+            let lastX = 0, lastY = 0, isMoving = false;
+            pad.addEventListener('touchstart', (e) => { lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; isMoving = true; });
+            pad.addEventListener('touchmove', (e) => {
+                if (!isMoving) return;
+                const dx = Math.round((e.touches[0].clientX - lastX) * 1.5);
+                const dy = Math.round((e.touches[0].clientY - lastY) * 1.5);
+                if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+                    fetch('/api/mouse/move', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ dx, dy }) });
+                    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+                }
+            });
+            pad.addEventListener('touchend', () => { isMoving = false; });
+        }
+        async function mouseClick(button) { await fetch('/api/mouse/click', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ button, double: false }) }); }
+        async function mouseScroll(x, y) { await fetch('/api/mouse/scroll', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ x, y }) }); }
+        async function takeScreenshot(handle, title) { const img = document.getElementById('screenshotImg'); const modal = document.getElementById('screenshotModal'); document.getElementById('modalTitle').innerText = title; img.src = `/api/screenshot?handle=${handle}&t=${Date.now()}`; modal.classList.remove('hidden'); }
+        function closeScreenshotModal() { document.getElementById('screenshotModal').classList.add('hidden'); }
         async function getClipboard() { try { const res = await fetch('/api/clipboard/get'); const data = await res.json(); document.getElementById('clipboardArea').value = data.text; } catch (e) { console.error(e); } }
         async function setClipboard() { await fetch('/api/clipboard/set', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ text: document.getElementById('clipboardArea').value }) }); }
         async function openApp() { const cmd = document.getElementById('openCommand').value; if (!cmd) return; await fetch('/api/open', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ command: cmd }) }); document.getElementById('openCommand').value = ''; setTimeout(refreshWindows, 1000); }
         async function setVolume(level) { await fetch('/api/volume', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ level: parseInt(level) }) }); }
-        async function shutdownPC() { if (confirm('Shutdown system?')) { await fetch('/api/shutdown', { method: 'POST' }); } }
+        async function shutdownPC() { if (confirm('Shutdown?')) { await fetch('/api/shutdown', { method: 'POST' }); } }
 
         refreshWindows();
         lucide.createIcons();

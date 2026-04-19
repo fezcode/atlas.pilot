@@ -183,8 +183,10 @@ func TypeString(handle string, text string) error {
 
 // SendKey focuses the window and taps a special key
 func SendKey(handle string, key string) error {
-	if err := FocusWindow(handle); err != nil {
-		return err
+	if handle != "" {
+		if err := FocusWindow(handle); err != nil {
+			return err
+		}
 	}
 	robotgo.KeyTap(key)
 	return nil
@@ -192,8 +194,10 @@ func SendKey(handle string, key string) error {
 
 // SendHotkey focuses the window and taps a key with modifiers
 func SendHotkey(handle string, key string, modifiers []string) error {
-	if err := FocusWindow(handle); err != nil {
-		return err
+	if handle != "" {
+		if err := FocusWindow(handle); err != nil {
+			return err
+		}
 	}
 	
 	// Convert []string to []interface{} for robotgo
@@ -204,6 +208,22 @@ func SendHotkey(handle string, key string, modifiers []string) error {
 	
 	robotgo.KeyTap(key, mods...)
 	return nil
+}
+
+// MoveMouseRelative moves the mouse cursor by dx, dy
+func MoveMouseRelative(dx, dy int) {
+	x, y := robotgo.GetMousePos()
+	robotgo.MoveMouse(x+dx, y+dy)
+}
+
+// ClickMouse performs a mouse click
+func ClickMouse(button string, double bool) {
+	robotgo.Click(button, double)
+}
+
+// ScrollMouse scrolls the mouse wheel
+func ScrollMouse(x, y int) {
+	robotgo.Scroll(x, y)
 }
 
 // GetClipboard returns the current clipboard text

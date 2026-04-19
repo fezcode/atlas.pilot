@@ -71,6 +71,9 @@ func main() {
 	http.HandleFunc("/api/paste", handlePaste)
 	http.HandleFunc("/api/maximize", handleMaximizeWindow)
 	http.HandleFunc("/api/minimize", handleMinimizeWindow)
+	http.HandleFunc("/api/mouse/move", handleMouseMove)
+	http.HandleFunc("/api/mouse/click", handleMouseClick)
+	http.HandleFunc("/api/mouse/scroll", handleMouseScroll)
 
 	// Sub-directory the embedded filesystem to the "templates" folder
 	templatesFS, err := fs.Sub(embeddedFS, "templates")
@@ -393,5 +396,56 @@ func handlePaste(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleMouseMove(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		DX int `json:"dx"`
+		DY int `json:"dy"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	window.MoveMouseRelative(req.DX, req.DY)
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleMouseClick(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		Button string `json:"button"`
+		Double bool   `json:"double"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	window.ClickMouse(req.Button, req.Double)
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleMouseScroll(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		X int `json:"x"`
+		Y int `json:"y"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	window.ScrollMouse(req.X, req.Y)
 	w.WriteHeader(http.StatusOK)
 }
