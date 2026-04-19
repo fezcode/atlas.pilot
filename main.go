@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"net"
 	"net/http"
 	"os"
@@ -13,7 +14,7 @@ import (
 )
 
 //go:embed templates/*
-var templatesFS embed.FS
+var embeddedFS embed.FS
 
 func getLocalIPs() []string {
 	var ips []string
@@ -70,7 +71,14 @@ func main() {
 	http.HandleFunc("/api/maximize", handleMaximizeWindow)
 	http.HandleFunc("/api/minimize", handleMinimizeWindow)
 
-	// Serve static files from embedded FS
+	// Sub-directory the embedded filesystem to the "templates" folder
+	templatesFS, err := fs.Sub(embeddedFS, "templates")
+	if err != nil {
+		fmt.Printf("Error sub-directorying embedded FS: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Serve static files from the sub-FS
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(templatesFS))))
 
 	port := "5000"
@@ -81,7 +89,7 @@ func main() {
 	}
 	fmt.Printf("\nControl this PC over WiFi using any of the URLs above.\n")
 
-	err := http.ListenAndServe(":"+port, nil)
+	err = http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		fmt.Printf("Error starting server: %v\n", err)
 		os.Exit(1)
@@ -89,7 +97,8 @@ func main() {
 }
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFS(templatesFS, "templates/index.html")
+	// Parse templates from the full embeddedFS using the "templates/" prefix
+	tmpl, err := template.ParseFS(embeddedFS, "templates/index.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
