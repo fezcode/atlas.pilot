@@ -11,16 +11,15 @@ func Run(bake *gobake.Engine) error {
 		return err
 	}
 
-	bake.Task("build", "Builds the binary for Windows", func(ctx *gobake.Context) error {
+	bake.Task("build", "Builds the binary for Windows x64", func(ctx *gobake.Context) error {
 		ctx.Log("Building %s v%s...", bake.Info.Name, bake.Info.Version)
 
-		// Restricted to Windows as robotgo/win dependencies are platform-specific
+		// Restricted to Windows x64 as robotgo/win dependencies are platform-specific
 		targets := []struct {
 			os   string
 			arch string
 		}{
 			{"windows", "amd64"},
-			{"windows", "arm64"},
 		}
 
 		err := ctx.Mkdir("build")
