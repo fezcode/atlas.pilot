@@ -190,6 +190,22 @@ func SendKey(handle string, key string) error {
 	return nil
 }
 
+// SendHotkey focuses the window and taps a key with modifiers
+func SendHotkey(handle string, key string, modifiers []string) error {
+	if err := FocusWindow(handle); err != nil {
+		return err
+	}
+	
+	// Convert []string to []interface{} for robotgo
+	mods := make([]interface{}, len(modifiers))
+	for i, m := range modifiers {
+		mods[i] = m
+	}
+	
+	robotgo.KeyTap(key, mods...)
+	return nil
+}
+
 // GetClipboard returns the current clipboard text
 func GetClipboard() (string, error) {
 	return robotgo.ReadAll()

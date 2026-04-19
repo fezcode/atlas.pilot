@@ -57,7 +57,6 @@
         .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
         .px-4 { padding-left: 1rem; padding-right: 1rem; }
         .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-        .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
         .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
         .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
         .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
@@ -232,7 +231,7 @@
     </div>
 
     <div id="keyboardModal" class="hidden modal-overlay">
-        <div class="glass-card w-full p-6 flex flex-col gap-6" style="max-width: 448px;">
+        <div class="glass-card w-full p-6 flex flex-col gap-6" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
             <div class="flex justify-between items-center">
                 <h3 id="keyboardModalTitle" class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Keyboard</h3>
                 <button onclick="closeKeyboardModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
@@ -242,17 +241,53 @@
                     <input type="text" id="keyboardInput" class="input-dark px-4 py-3 text-sm" placeholder="Type text...">
                     <button onclick="submitKeyboardText()" class="btn btn-primary px-6 rounded-xl"><i data-lucide="send" style="width: 16px; height: 16px;"></i></button>
                 </div>
-                <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
-                    <button onclick="sendKey('enter')" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--primary);">ENTER</button>
-                    <button onclick="sendKey('backspace')" class="btn btn-secondary py-3 text-xs font-bold">BS</button>
-                    <button onclick="sendKey('tab')" class="btn btn-secondary py-3 text-xs font-bold">TAB</button>
-                    <button onclick="sendKey('escape')" class="btn btn-secondary py-3 text-xs font-bold">ESC</button>
-                    <button onclick="sendKey('up')" class="btn btn-secondary py-3"><i data-lucide="chevron-up" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
-                    <button onclick="sendKey('down')" class="btn btn-secondary py-3"><i data-lucide="chevron-down" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
-                    <button onclick="sendKey('left')" class="btn btn-secondary py-3"><i data-lucide="chevron-left" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
-                    <button onclick="sendKey('right')" class="btn btn-secondary py-3"><i data-lucide="chevron-right" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
-                    <button onclick="sendKey('space')" class="btn btn-secondary py-3 text-xs font-bold" style="grid-column: span 2;">SPACE</button>
-                    <button onclick="pasteIntoWindow()" class="btn btn-primary py-3 text-xs font-bold gap-2" style="grid-column: span 2;"><i data-lucide="clipboard-paste" style="width: 12px; height: 12px;"></i> PASTE</button>
+                
+                <div class="flex flex-col gap-3">
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Navigation & Basic</span>
+                    <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+                        <button onclick="sendKey('enter')" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--primary);">ENTER</button>
+                        <button onclick="sendKey('backspace')" class="btn btn-secondary py-3 text-xs font-bold">BS</button>
+                        <button onclick="sendKey('tab')" class="btn btn-secondary py-3 text-xs font-bold">TAB</button>
+                        <button onclick="sendKey('escape')" class="btn btn-secondary py-3 text-xs font-bold">ESC</button>
+                        <button onclick="sendKey('up')" class="btn btn-secondary py-3"><i data-lucide="chevron-up" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
+                        <button onclick="sendKey('down')" class="btn btn-secondary py-3"><i data-lucide="chevron-down" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
+                        <button onclick="sendKey('left')" class="btn btn-secondary py-3"><i data-lucide="chevron-left" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
+                        <button onclick="sendKey('right')" class="btn btn-secondary py-3"><i data-lucide="chevron-right" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
+                        <button onclick="sendKey('space')" class="btn btn-secondary py-3 text-xs font-bold" style="grid-column: span 2;">SPACE</button>
+                        <button onclick="pasteIntoWindow()" class="btn btn-primary py-3 text-xs font-bold gap-2" style="grid-column: span 2;"><i data-lucide="clipboard-paste" style="width: 12px; height: 12px;"></i> PASTE</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Shortcuts</span>
+                    <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+                        <button onclick="sendHotkey('c', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+C</button>
+                        <button onclick="sendHotkey('v', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+V</button>
+                        <button onclick="sendHotkey('x', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+X</button>
+                        <button onclick="sendHotkey('z', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+Z</button>
+                        <button onclick="sendHotkey('a', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+A</button>
+                        <button onclick="sendHotkey('s', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+S</button>
+                        <button onclick="sendHotkey('f', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+F</button>
+                        <button onclick="sendHotkey('f4', ['alt'])" class="btn btn-danger py-2 text-[10px] font-bold">ALT+F4</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Function Keys</span>
+                    <div class="grid" style="grid-template-columns: repeat(6, 1fr); gap: 0.4rem;">
+                        <button onclick="sendKey('f1')" class="btn btn-secondary py-2 text-[10px] font-bold">F1</button>
+                        <button onclick="sendKey('f2')" class="btn btn-secondary py-2 text-[10px] font-bold">F2</button>
+                        <button onclick="sendKey('f3')" class="btn btn-secondary py-2 text-[10px] font-bold">F3</button>
+                        <button onclick="sendKey('f4')" class="btn btn-secondary py-2 text-[10px] font-bold">F4</button>
+                        <button onclick="sendKey('f5')" class="btn btn-secondary py-2 text-[10px] font-bold">F5</button>
+                        <button onclick="sendKey('f6')" class="btn btn-secondary py-2 text-[10px] font-bold">F6</button>
+                        <button onclick="sendKey('f7')" class="btn btn-secondary py-2 text-[10px] font-bold">F7</button>
+                        <button onclick="sendKey('f8')" class="btn btn-secondary py-2 text-[10px] font-bold">F8</button>
+                        <button onclick="sendKey('f9')" class="btn btn-secondary py-2 text-[10px] font-bold">F9</button>
+                        <button onclick="sendKey('f10')" class="btn btn-secondary py-2 text-[10px] font-bold">F10</button>
+                        <button onclick="sendKey('f11')" class="btn btn-secondary py-2 text-[10px] font-bold">F11</button>
+                        <button onclick="sendKey('f12')" class="btn btn-secondary py-2 text-[10px] font-bold">F12</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -265,9 +300,7 @@
                 <h3 id="manageModalTitle" class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Manage Window</h3>
                 <button onclick="closeManageModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
             </div>
-            
             <div class="flex flex-col gap-6">
-                <!-- Basic State -->
                 <div class="flex flex-col gap-3">
                     <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Visibility & State</span>
                     <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
@@ -276,14 +309,10 @@
                         <button onclick="minimizeWindow(currentHandle)" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--warning);">Minimize</button>
                     </div>
                 </div>
-
-                <!-- Position & Monitor -->
                 <div class="flex flex-col gap-3">
                     <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Layout & Display</span>
                     <div class="flex flex-col gap-2">
-                        <button onclick="snapWindow(currentHandle, 'next-monitor')" class="btn btn-primary py-3 text-xs font-bold gap-2">
-                            <i data-lucide="monitor-forward" style="width: 16px; height: 16px;"></i> MOVE TO OTHER MONITOR
-                        </button>
+                        <button onclick="snapWindow(currentHandle, 'next-monitor')" class="btn btn-primary py-3 text-xs font-bold gap-2"><i data-lucide="monitor-forward" style="width: 16px; height: 16px;"></i> MOVE TO OTHER MONITOR</button>
                         <div class="grid" style="grid-template-columns: repeat(5, 1fr); gap: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 12px;">
                             <button onclick="snapWindow(currentHandle, 'top-left')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-up-left" style="width: 18px; height: 18px; color: #71717a;"></i></button>
                             <button onclick="snapWindow(currentHandle, 'top-right')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-up-right" style="width: 18px; height: 18px; color: #71717a;"></i></button>
@@ -293,12 +322,8 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Danger Zone -->
                 <div class="pt-4 border-t border-zinc-800">
-                    <button onclick="closeWindow(currentHandle); closeManageModal();" class="btn btn-danger w-full py-3 text-xs font-bold gap-2">
-                        <i data-lucide="x-circle" style="width: 14px; height: 14px;"></i> TERMINATE PROCESS
-                    </button>
+                    <button onclick="closeWindow(currentHandle); closeManageModal();" class="btn btn-danger w-full py-3 text-xs font-bold gap-2"><i data-lucide="x-circle" style="width: 14px; height: 14px;"></i> TERMINATE PROCESS</button>
                 </div>
             </div>
         </div>
@@ -306,7 +331,6 @@
 
     <script>
         let currentHandle = null;
-
         async function refreshWindows() {
             const list = document.getElementById('windowList');
             try {
@@ -345,7 +369,6 @@
 
         function openKeyboardModal(handle, title) { currentHandle = handle; document.getElementById('keyboardModalTitle').innerText = title; document.getElementById('keyboardModal').classList.remove('hidden'); lucide.createIcons(); }
         function closeKeyboardModal() { document.getElementById('keyboardModal').classList.add('hidden'); currentHandle = null; }
-
         function openManageModal(handle, title) { currentHandle = handle; document.getElementById('manageModalTitle').innerText = title; document.getElementById('manageModal').classList.remove('hidden'); lucide.createIcons(); }
         function closeManageModal() { document.getElementById('manageModal').classList.add('hidden'); currentHandle = null; }
 
@@ -359,6 +382,16 @@
             input.value = '';
         }
         async function sendKey(key) { if (!currentHandle) return; await fetch('/api/key', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle, key }) }); }
+        
+        async function sendHotkey(key, modifiers) {
+            if (!currentHandle) return;
+            await fetch('/api/hotkey', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ handle: currentHandle, key, modifiers })
+            });
+        }
+
         async function pasteIntoWindow() { if (!currentHandle) return; await setClipboard(); await fetch('/api/paste', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle }) }); }
         async function quickPaste(handle) { currentHandle = handle; await pasteIntoWindow(); currentHandle = null; }
         async function takeScreenshot(handle, title) {
