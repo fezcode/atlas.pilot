@@ -66,6 +66,7 @@ func main() {
 	http.HandleFunc("/api/clipboard/get", handleGetClipboard)
 	http.HandleFunc("/api/clipboard/set", handleSetClipboard)
 	http.HandleFunc("/api/screenshot", handleScreenshot)
+	http.HandleFunc("/api/paste", handlePaste)
 
 	port := "5000"
 	ips := getLocalIPs()
@@ -300,4 +301,23 @@ func handleScreenshot(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "image/png")
 	w.Write(img)
+}
+
+func handlePaste(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		Handle string `json:"handle"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := window.PasteIntoWindow(req.Handle); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }

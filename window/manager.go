@@ -174,6 +174,15 @@ func SetClipboard(text string) error {
 	return robotgo.WriteAll(text)
 }
 
+// PasteIntoWindow focuses the window and sends a paste command
+func PasteIntoWindow(handle string) error {
+	if err := FocusWindow(handle); err != nil {
+		return err
+	}
+	robotgo.KeyTap("v", "control")
+	return nil
+}
+
 // CaptureWindow takes a screenshot of the specified window and returns it as PNG bytes
 func CaptureWindow(handle string) ([]byte, error) {
 	if err := FocusWindow(handle); err != nil {
