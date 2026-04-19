@@ -1,7 +1,25 @@
+# Build artifacts
 build/
 *.exe
+*.dll
+*.so
+*.dylib
+
+# IDEs
 .idea/
+.vscode/
+*.swp
+*.swo
+
+# Go
 vendor/
 go.sum
-robotgo_doc.txt
-robotgo_window_doc.txt
+
+# Temporary files
+*atlas_ss_*.png
+temp/
+tmp/
+
+# OS specific
+.DS_Store
+Thumbs.db
