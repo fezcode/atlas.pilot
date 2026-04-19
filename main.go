@@ -64,6 +64,7 @@ func main() {
 	http.HandleFunc("/api/type", handleTypeString)
 	http.HandleFunc("/api/clipboard/get", handleGetClipboard)
 	http.HandleFunc("/api/clipboard/set", handleSetClipboard)
+	http.HandleFunc("/api/screenshot", handleScreenshot)
 
 	port := "5000"
 	ips := getLocalIPs()
@@ -261,4 +262,21 @@ func handleSetClipboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func handleScreenshot(w http.ResponseWriter, r *http.Request) {
+	handle := r.URL.Query().Get("handle")
+	if handle == "" {
+		http.Error(w, "Handle is required", http.StatusBadRequest)
+		return
+	}
+
+	img, err := window.CaptureWindow(handle)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/png")
+	w.Write(img)
 }

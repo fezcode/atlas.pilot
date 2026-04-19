@@ -2,9 +2,12 @@ package window
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"github.com/go-vgo/robotgo"
@@ -160,6 +163,40 @@ func GetClipboard() (string, error) {
 // SetClipboard sets the current clipboard text
 func SetClipboard(text string) error {
 	return robotgo.WriteAll(text)
+}
+
+// CaptureWindow takes a screenshot of the specified window and returns it as PNG bytes
+func CaptureWindow(handle string) ([]byte, error) {
+	if err := FocusWindow(handle); err != nil {
+		return nil, err
+	}
+	
+	// Small delay to ensure window is focused
+	time.Sleep(200 * time.Millisecond)
+
+	var hwnd uintptr
+	fmt.Sscanf(handle, "%v", &hwnd)
+	
+	var rect win.RECT
+	procGetWindowRect.Call(hwnd, uintptr(unsafe.Pointer(&rect)))
+	
+	w := rect.Right - rect.Left
+	h := rect.Bottom - rect.Top
+	
+	img, err := robotgo.CaptureImg(int(rect.Left), int(rect.Top), int(w), int(h))
+	if err != nil {
+		return nil, err
+	}
+
+	tempFile := filepath.Join(os.TempDir(), fmt.Sprintf("atlas_ss_%d.png", time.Now().UnixNano()))
+	defer os.Remove(tempFile)
+
+	err = robotgo.Save(img, tempFile)
+	if err != nil {
+		return nil, err
+	}
+
+	return os.ReadFile(tempFile)
 }
 
 // CloseWindow sends a close message to the window

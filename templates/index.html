@@ -63,6 +63,19 @@
         </div>
     </div>
 
+    <!-- Screenshot Modal -->
+    <div id="screenshotModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg max-w-full max-h-full overflow-hidden flex flex-col">
+            <div class="p-2 border-b flex justify-between items-center">
+                <span id="modalTitle" class="font-bold truncate mr-4">Screenshot</span>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-800 font-bold px-2">✕</button>
+            </div>
+            <div class="overflow-auto p-2">
+                <img id="screenshotImg" src="" alt="Screenshot" class="max-w-full h-auto shadow-inner">
+            </div>
+        </div>
+    </div>
+
     <script>
         async function refreshWindows() {
             const list = document.getElementById('windowList');
@@ -82,20 +95,21 @@
                 });
 
                 list.innerHTML = windows.map(win => `
-                    <div class="border rounded p-3 ${win.controllable ? 'bg-white' : 'bg-gray-50 opacity-60'} transition-colors">
+                    <div class="border rounded p-3 ${win.controllable ? 'bg-white' : 'bg-gray-50 opacity-60'} transition-colors shadow-sm">
                         <div class="flex flex-col gap-2">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center truncate mr-2">
                                     <span class="w-2 h-2 min-w-[8px] rounded-full mr-2 ${win.controllable ? 'bg-green-500' : 'bg-gray-400'}"></span>
                                     <span class="font-medium text-gray-800 truncate text-xs" title="${win.title}">${win.title}</span>
                                 </div>
-                                <button onclick="closeWindow('${win.handle}')" class="text-red-500 hover:text-red-700 text-[10px] font-bold">Close</button>
+                                <button onclick="closeWindow('${win.handle}')" class="text-red-500 hover:text-red-700 text-[10px] font-bold px-1">Close</button>
                             </div>
                             
                             ${win.controllable ? `
                             <div class="space-y-2">
                                 <div class="flex flex-wrap items-center gap-1">
                                     <button onclick="focusWindow('${win.handle}')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-2 py-1 rounded text-[10px] font-bold">Focus</button>
+                                    <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">📸 SS</button>
                                     <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded text-[10px] font-bold">🖥️ Next</button>
                                     <div class="flex gap-1 bg-gray-100 p-1 rounded">
                                         <button onclick="snapWindow('${win.handle}', 'top-left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Top Left">↖️</button>
@@ -128,6 +142,20 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ handle })
             });
+        }
+
+        async function takeScreenshot(handle, title) {
+            const img = document.getElementById('screenshotImg');
+            const modal = document.getElementById('screenshotModal');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            modalTitle.innerText = `Screenshot: ${title}`;
+            img.src = `/api/screenshot?handle=${handle}&t=${Date.now()}`;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('screenshotModal').classList.add('hidden');
         }
 
         async function snapWindow(handle, position) {
@@ -206,7 +234,7 @@
         }
 
         refreshWindows();
-        setInterval(refreshWindows, 10000);
+        setInterval(refreshWindows, 15000);
     </script>
 </body>
 </html>
