@@ -198,15 +198,24 @@ func SendHotkey(handle string, key string, modifiers []string) error {
 		if err := FocusWindow(handle); err != nil {
 			return err
 		}
+		time.Sleep(200 * time.Millisecond)
 	}
 	
-	// Convert []string to []interface{} for robotgo
-	mods := make([]interface{}, len(modifiers))
-	for i, m := range modifiers {
-		mods[i] = m
+	fmt.Printf("Sending Hotkey: %s with mods: %v\n", key, modifiers)
+	
+	// Press modifiers down
+	for _, mod := range modifiers {
+		robotgo.KeyToggle(mod, "down")
 	}
 	
-	robotgo.KeyTap(key, mods...)
+	// Tap the key
+	robotgo.KeyTap(key)
+	
+	// Release modifiers up (reverse order is safer)
+	for i := len(modifiers) - 1; i >= 0; i-- {
+		robotgo.KeyToggle(modifiers[i], "up")
+	}
+	
 	return nil
 }
 
