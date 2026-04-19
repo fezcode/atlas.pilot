@@ -6,24 +6,24 @@
     <title>Atlas Window Controller</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+<body class="bg-gray-100 min-h-screen p-2 md:p-8">
     <div class="max-w-4xl mx-auto">
-        <header class="mb-8 flex justify-between items-start">
+        <header class="mb-4 md:mb-8 flex justify-between items-start">
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">Atlas Window Controller</h1>
-                <p class="text-gray-600">Connected to: 
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Atlas Window Controller</h1>
+                <p class="text-gray-600 text-xs md:text-sm">Connected to: 
                     {{range .IPs}}
-                    <span class="font-mono bg-white px-2 rounded border mr-2 text-xs md:text-sm">{{.}}:5000</span>
+                    <span class="font-mono bg-white px-2 rounded border mr-2">{{.}}:5000</span>
                     {{end}}
                 </p>
             </div>
-            <button onclick="shutdownPC()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors">Shutdown PC</button>
+            <button onclick="shutdownPC()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded text-xs md:text-sm transition-colors">Shutdown PC</button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div class="space-y-8">
-                <section class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">System Controls</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-8">
+            <div class="space-y-4 md:space-y-8">
+                <section class="bg-white rounded-lg shadow-md p-4 md:p-6">
+                    <h2 class="text-lg md:text-xl font-semibold mb-4 border-b pb-2">System Controls</h2>
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Volume</label>
@@ -39,21 +39,21 @@
                     </div>
                 </section>
 
-                <section class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">Clipboard Sync</h2>
+                <section class="bg-white rounded-lg shadow-md p-4 md:p-6">
+                    <h2 class="text-lg md:text-xl font-semibold mb-4 border-b pb-2">Clipboard Sync</h2>
                     <div class="space-y-4">
-                        <textarea id="clipboardArea" rows="4" class="w-full border rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="PC Clipboard content will appear here..."></textarea>
+                        <textarea id="clipboardArea" rows="3" class="w-full border rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Clipboard..."></textarea>
                         <div class="flex gap-2">
-                            <button onclick="getClipboard()" class="flex-grow bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded text-sm transition-colors">Get from PC</button>
-                            <button onclick="setClipboard()" class="flex-grow bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded text-sm transition-colors">Set to PC</button>
+                            <button onclick="getClipboard()" class="flex-grow bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded text-xs md:text-sm">Get from PC</button>
+                            <button onclick="setClipboard()" class="flex-grow bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-2 rounded text-xs md:text-sm">Set to PC</button>
                         </div>
                     </div>
                 </section>
             </div>
 
-            <section class="bg-white rounded-lg shadow-md p-6">
+            <section class="bg-white rounded-lg shadow-md p-4 md:p-6">
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h2 class="text-xl font-semibold">Active Windows</h2>
+                    <h2 class="text-lg md:text-xl font-semibold">Active Windows</h2>
                     <button onclick="refreshWindows()" class="text-blue-500 hover:text-blue-700 font-medium text-sm">Refresh</button>
                 </div>
                 <div id="windowList" class="space-y-3 max-h-[600px] overflow-y-auto">
@@ -64,19 +64,57 @@
     </div>
 
     <!-- Screenshot Modal -->
-    <div id="screenshotModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-lg max-w-full max-h-full overflow-hidden flex flex-col">
-            <div class="p-2 border-b flex justify-between items-center">
-                <span id="modalTitle" class="font-bold truncate mr-4">Screenshot</span>
-                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-800 font-bold px-2">✕</button>
+    <div id="screenshotModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-2 md:p-4 z-50">
+        <div class="bg-white rounded-lg max-w-full max-h-full overflow-hidden flex flex-col shadow-2xl">
+            <div class="p-2 border-b flex justify-between items-center bg-gray-50">
+                <span id="modalTitle" class="font-bold truncate mr-4 text-sm md:text-base text-gray-700">Screenshot</span>
+                <button onclick="closeScreenshotModal()" class="text-gray-500 hover:text-red-500 font-bold px-3 py-1 text-xl">✕</button>
             </div>
-            <div class="overflow-auto p-2">
-                <img id="screenshotImg" src="" alt="Screenshot" class="max-w-full h-auto shadow-inner">
+            <div class="overflow-auto p-2 bg-gray-200">
+                <img id="screenshotImg" src="" alt="Screenshot" class="max-w-full h-auto mx-auto shadow-lg">
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Modal -->
+    <div id="keyboardModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-2 md:p-4 z-50">
+        <div class="bg-white rounded-lg w-full max-w-md flex flex-col shadow-2xl">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+                <span id="keyboardModalTitle" class="font-bold truncate text-gray-700">Keyboard Control</span>
+                <button onclick="closeKeyboardModal()" class="text-gray-500 hover:text-red-500 font-bold px-2 text-xl">✕</button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Text Input</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="keyboardInput" class="flex-grow border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Type text here...">
+                        <button onclick="submitKeyboardText()" class="bg-blue-600 text-white font-bold px-4 py-2 rounded">Send</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Special Keys</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="sendKey('enter')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Enter</button>
+                        <button onclick="sendKey('backspace')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">BS</button>
+                        <button onclick="sendKey('tab')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Tab</button>
+                        <button onclick="sendKey('escape')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Esc</button>
+                        <button onclick="sendKey('up')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Up</button>
+                        <button onclick="sendKey('down')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Down</button>
+                        <button onclick="sendKey('left')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Left</button>
+                        <button onclick="sendKey('right')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Right</button>
+                        <button onclick="sendKey('space')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold col-span-2">Space</button>
+                        <button onclick="sendKey('f5')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">F5</button>
+                        <button onclick="sendKey('win')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Win</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        let currentHandle = null;
+
         async function refreshWindows() {
             const list = document.getElementById('windowList');
             try {
@@ -84,7 +122,7 @@
                 const windows = await response.json();
                 
                 if (windows.length === 0) {
-                    list.innerHTML = '<p class="text-gray-400 italic">No visible windows found.</p>';
+                    list.innerHTML = '<p class="text-gray-400 italic text-sm">No visible windows found.</p>';
                     return;
                 }
 
@@ -106,25 +144,17 @@
                             </div>
                             
                             ${win.controllable ? `
-                            <div class="space-y-2">
-                                <div class="flex flex-wrap items-center gap-1">
-                                    <button onclick="focusWindow('${win.handle}')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-2 py-1 rounded text-[10px] font-bold">Focus</button>
-                                    <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">📸 SS</button>
-                                    <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded text-[10px] font-bold">🖥️ Next</button>
-                                    <div class="flex gap-1 bg-gray-100 p-1 rounded">
-                                        <button onclick="snapWindow('${win.handle}', 'top-left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Top Left">↖️</button>
-                                        <button onclick="snapWindow('${win.handle}', 'top-right')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Top Right">↗️</button>
-                                        <button onclick="snapWindow('${win.handle}', 'bottom-left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Bottom Left">↙️</button>
-                                        <button onclick="snapWindow('${win.handle}', 'bottom-right')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Bottom Right">↘️</button>
-                                        <button onclick="snapWindow('${win.handle}', 'left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Left Half">⬅️</button>
-                                        <button onclick="snapWindow('${win.handle}', 'right')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Right Half">➡️</button>
-                                        <button onclick="snapWindow('${win.handle}', 'full')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Fullscreen">🔲</button>
-                                        <button onclick="snapWindow('${win.handle}', 'center')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Center">🎯</button>
-                                    </div>
-                                </div>
-                                <div class="flex gap-1">
-                                    <input type="text" id="type-${win.handle}" placeholder="Type here..." class="flex-grow border rounded px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-blue-400">
-                                    <button onclick="typeString('${win.handle}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">Type</button>
+                            <div class="flex flex-wrap items-center gap-1">
+                                <button onclick="focusWindow('${win.handle}')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-2 py-1 rounded text-[10px] font-bold">Focus</button>
+                                <button onclick="openKeyboardModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-[10px] font-bold">⌨️ Keyboard</button>
+                                <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="bg-blue-400 hover:bg-blue-500 text-white px-2 py-1 rounded text-[10px] font-bold">📸 SS</button>
+                                <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded text-[10px] font-bold">🖥️ Next</button>
+                                <div class="flex gap-1 bg-gray-100 p-1 rounded">
+                                    <button onclick="snapWindow('${win.handle}', 'top-left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Top Left">↖️</button>
+                                    <button onclick="snapWindow('${win.handle}', 'top-right')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Top Right">↗️</button>
+                                    <button onclick="snapWindow('${win.handle}', 'bottom-left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Bottom Left">↙️</button>
+                                    <button onclick="snapWindow('${win.handle}', 'bottom-right')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Bottom Right">↘️</button>
+                                    <button onclick="snapWindow('${win.handle}', 'full')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Fullscreen">🔲</button>
                                 </div>
                             </div>
                             ` : ''}
@@ -132,8 +162,56 @@
                     </div>
                 `).join('');
             } catch (error) {
-                list.innerHTML = '<p class="text-red-500">Error fetching windows.</p>';
+                list.innerHTML = '<p class="text-red-500 text-sm">Error fetching windows.</p>';
             }
+        }
+
+        function openKeyboardModal(handle, title) {
+            currentHandle = handle;
+            document.getElementById('keyboardModalTitle').innerText = `Keyboard: ${title}`;
+            document.getElementById('keyboardModal').classList.remove('hidden');
+            document.getElementById('keyboardInput').focus();
+        }
+
+        function closeKeyboardModal() {
+            document.getElementById('keyboardModal').classList.add('hidden');
+            currentHandle = null;
+        }
+
+        async function submitKeyboardText() {
+            const input = document.getElementById('keyboardInput');
+            const text = input.value;
+            if (!text || !currentHandle) return;
+            
+            await fetch('/api/type', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ handle: currentHandle, text })
+            });
+            input.value = '';
+        }
+
+        async function sendKey(key) {
+            if (!currentHandle) return;
+            await fetch('/api/key', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ handle: currentHandle, key })
+            });
+        }
+
+        // Keep screenshot and existing functions
+        async function takeScreenshot(handle, title) {
+            const img = document.getElementById('screenshotImg');
+            const modal = document.getElementById('screenshotModal');
+            const modalTitle = document.getElementById('modalTitle');
+            modalTitle.innerText = `Screenshot: ${title}`;
+            img.src = `/api/screenshot?handle=${handle}&t=${Date.now()}`;
+            modal.classList.remove('hidden');
+        }
+
+        function closeScreenshotModal() {
+            document.getElementById('screenshotModal').classList.add('hidden');
         }
 
         async function focusWindow(handle) {
@@ -142,20 +220,6 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ handle })
             });
-        }
-
-        async function takeScreenshot(handle, title) {
-            const img = document.getElementById('screenshotImg');
-            const modal = document.getElementById('screenshotModal');
-            const modalTitle = document.getElementById('modalTitle');
-            
-            modalTitle.innerText = `Screenshot: ${title}`;
-            img.src = `/api/screenshot?handle=${handle}&t=${Date.now()}`;
-            modal.classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('screenshotModal').classList.add('hidden');
         }
 
         async function snapWindow(handle, position) {
@@ -176,18 +240,6 @@
                 });
                 setTimeout(refreshWindows, 500);
             }
-        }
-
-        async function typeString(handle) {
-            const input = document.getElementById(`type-${handle}`);
-            const text = input.value;
-            if (!text) return;
-            await fetch('/api/type', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ handle, text })
-            });
-            input.value = '';
         }
 
         async function getClipboard() {

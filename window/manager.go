@@ -155,6 +155,15 @@ func TypeString(handle string, text string) error {
 	return nil
 }
 
+// SendKey focuses the window and taps a special key
+func SendKey(handle string, key string) error {
+	if err := FocusWindow(handle); err != nil {
+		return err
+	}
+	robotgo.KeyTap(key)
+	return nil
+}
+
 // GetClipboard returns the current clipboard text
 func GetClipboard() (string, error) {
 	return robotgo.ReadAll()

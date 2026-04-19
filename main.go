@@ -62,6 +62,7 @@ func main() {
 	http.HandleFunc("/api/volume", handleSetVolume)
 	http.HandleFunc("/api/shutdown", handleShutdown)
 	http.HandleFunc("/api/type", handleTypeString)
+	http.HandleFunc("/api/key", handleSendKey)
 	http.HandleFunc("/api/clipboard/get", handleGetClipboard)
 	http.HandleFunc("/api/clipboard/set", handleSetClipboard)
 	http.HandleFunc("/api/screenshot", handleScreenshot)
@@ -227,6 +228,26 @@ func handleTypeString(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := window.TypeString(req.Handle, req.Text); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleSendKey(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		Handle string `json:"handle"`
+		Key    string `json:"key"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := window.SendKey(req.Handle, req.Key); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
