@@ -62,6 +62,9 @@ func main() {
 	http.HandleFunc("/api/close", handleCloseWindow)
 	http.HandleFunc("/api/volume", handleSetVolume)
 	http.HandleFunc("/api/shutdown", handleShutdown)
+	http.HandleFunc("/api/restart", handleRestart)
+	http.HandleFunc("/api/sleep", handleSleep)
+	http.HandleFunc("/api/lock", handleLock)
 	http.HandleFunc("/api/type", handleTypeString)
 	http.HandleFunc("/api/key", handleSendKey)
 	http.HandleFunc("/api/hotkey", handleSendHotkey)
@@ -188,8 +191,8 @@ func handleSnapWindow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct {
-		Handle   string `json:"handle"`
-		Position string `json:"position"`
+		Handle   string   `json:"handle"`
+		Position string   `json:"position"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -265,6 +268,42 @@ func handleShutdown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := window.ShutdownPC(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleRestart(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if err := window.RestartPC(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleSleep(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if err := window.SleepPC(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleLock(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if err := window.LockPC(); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

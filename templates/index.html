@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Atlas Window Controller</title>
+    <title>Atlas Pilot</title>
     <script src="/static/lucide.min.js"></script>
     <style>
         :root {
@@ -47,9 +47,6 @@
         .grow { flex-grow: 1; }
         .shrink-0 { flex-shrink: 0; }
         .hidden { display: none !important; }
-        .p-1 { padding: 0.25rem; }
-        .p-2 { padding: 0.5rem; }
-        .p-3 { padding: 0.75rem; }
         .p-4 { padding: 1rem; }
         .p-5 { padding: 1.25rem; }
         .p-6 { padding: 1.5rem; }
@@ -63,6 +60,7 @@
         .mb-2 { margin-bottom: 0.5rem; }
         .mb-4 { margin-bottom: 1rem; }
         .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
         .mb-10 { margin-bottom: 2.5rem; }
         .mt-1 { margin-top: 0.25rem; }
         .mt-2 { margin-top: 0.5rem; }
@@ -179,8 +177,8 @@
                 <button onclick="openMouseModal()" class="btn btn-secondary px-6 py-3 rounded-xl font-bold text-sm">
                     <i data-lucide="mouse-pointer-2" style="width: 16px; height: 16px; margin-right: 8px;"></i> Mouse
                 </button>
-                <button onclick="shutdownPC()" class="btn btn-danger px-6 py-3 rounded-xl font-bold text-sm">
-                    <i data-lucide="power" style="width: 16px; height: 16px; margin-right: 8px;"></i> Shutdown
+                <button onclick="openSystemModal()" class="btn btn-danger px-6 py-3 rounded-xl font-bold text-sm">
+                    <i data-lucide="power" style="width: 16px; height: 16px; margin-right: 8px;"></i> System
                 </button>
             </div>
         </header>
@@ -240,7 +238,7 @@
         </div>
     </div>
 
-    <!-- Screenshot Modal -->
+    <!-- Modals -->
     <div id="screenshotModal" class="hidden modal-overlay">
         <div class="glass-card w-full flex flex-col" style="max-width: 1024px; max-height: 90vh; overflow: hidden;">
             <div class="p-4 flex justify-between items-center bg-zinc-900/50" style="border-bottom: 1px solid var(--border-color);">
@@ -323,6 +321,7 @@
                 <h3 id="manageModalTitle" class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Manage Window</h3>
                 <button onclick="closeManageModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
             </div>
+            
             <div class="flex flex-col gap-6">
                 <div class="flex flex-col gap-3">
                     <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Visibility & State</span>
@@ -332,6 +331,7 @@
                         <button onclick="minimizeWindow(currentHandle)" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--warning);">Minimize</button>
                     </div>
                 </div>
+
                 <div class="flex flex-col gap-3">
                     <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Layout & Display</span>
                     <div class="flex flex-col gap-2">
@@ -345,6 +345,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="pt-4 border-t border-zinc-800">
                     <button onclick="closeWindow(currentHandle); closeManageModal();" class="btn btn-danger w-full py-3 text-xs font-bold gap-2"><i data-lucide="x-circle" style="width: 14px; height: 14px;"></i> TERMINATE PROCESS</button>
                 </div>
@@ -371,6 +372,34 @@
                     <button onclick="mouseScroll(0, 5)" class="btn btn-secondary py-4 text-xs font-bold gap-2"><i data-lucide="chevron-up"></i> SCROLL UP</button>
                     <button onclick="mouseScroll(0, -5)" class="btn btn-secondary py-4 text-xs font-bold gap-2"><i data-lucide="chevron-down"></i> SCROLL DOWN</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Modal -->
+    <div id="systemModal" class="hidden modal-overlay">
+        <div class="glass-card w-full p-6 flex flex-col gap-6" style="max-width: 448px;">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">OS Control</h3>
+                <button onclick="closeSystemModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
+            </div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button onclick="systemAction('shutdown')" class="btn btn-danger py-8 flex flex-col gap-3">
+                    <i data-lucide="power" style="width: 32px; height: 32px;"></i>
+                    <span class="text-xs font-bold uppercase">Shutdown</span>
+                </button>
+                <button onclick="systemAction('restart')" class="btn btn-secondary py-8 flex flex-col gap-3" style="color: var(--warning); border-color: rgba(245, 158, 11, 0.2);">
+                    <i data-lucide="refresh-cw" style="width: 32px; height: 32px;"></i>
+                    <span class="text-xs font-bold uppercase">Restart</span>
+                </button>
+                <button onclick="systemAction('sleep')" class="btn btn-secondary py-8 flex flex-col gap-3" style="color: #818cf8; border-color: rgba(129, 140, 248, 0.2);">
+                    <i data-lucide="moon" style="width: 32px; height: 32px;"></i>
+                    <span class="text-xs font-bold uppercase">Sleep</span>
+                </button>
+                <button onclick="systemAction('lock')" class="btn btn-secondary py-8 flex flex-col gap-3">
+                    <i data-lucide="lock" style="width: 32px; height: 32px;"></i>
+                    <span class="text-xs font-bold uppercase">Lock PC</span>
+                </button>
             </div>
         </div>
     </div>
@@ -419,6 +448,15 @@
         function closeManageModal() { document.getElementById('manageModal').classList.add('hidden'); currentHandle = null; }
         function openMouseModal() { document.getElementById('mouseModal').classList.remove('hidden'); lucide.createIcons(); initTrackpad(); }
         function closeMouseModal() { document.getElementById('mouseModal').classList.add('hidden'); }
+        function openSystemModal() { document.getElementById('systemModal').classList.remove('hidden'); lucide.createIcons(); }
+        function closeSystemModal() { document.getElementById('systemModal').classList.add('hidden'); }
+
+        async function systemAction(action) {
+            let confirmed = (action === 'sleep' || action === 'lock') ? true : confirm(`Are you sure you want to ${action}?`);
+            if (!confirmed) return;
+            await fetch(`/api/${action}`, { method: 'POST' });
+            closeSystemModal();
+        }
 
         async function maximizeWindow(handle) { if(!handle) return; await fetch('/api/maximize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
         async function minimizeWindow(handle) { if(!handle) return; await fetch('/api/minimize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
@@ -437,8 +475,8 @@
             pad.addEventListener('touchstart', (e) => { lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; isMoving = true; });
             pad.addEventListener('touchmove', (e) => {
                 if (!isMoving) return;
-                const dx = Math.round((e.touches[0].clientX - lastX) * 1.5);
-                const dy = Math.round((e.touches[0].clientY - lastY) * 1.5);
+                const dx = Math.round((e.touches[0].clientX - lastX) * 2.5);
+                const dy = Math.round((e.touches[0].clientY - lastY) * 2.5);
                 if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
                     fetch('/api/mouse/move', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ dx, dy }) });
                     lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
@@ -454,7 +492,6 @@
         async function setClipboard() { await fetch('/api/clipboard/set', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ text: document.getElementById('clipboardArea').value }) }); }
         async function openApp() { const cmd = document.getElementById('openCommand').value; if (!cmd) return; await fetch('/api/open', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ command: cmd }) }); document.getElementById('openCommand').value = ''; setTimeout(refreshWindows, 1000); }
         async function setVolume(level) { await fetch('/api/volume', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ level: parseInt(level) }) }); }
-        async function shutdownPC() { if (confirm('Shutdown?')) { await fetch('/api/shutdown', { method: 'POST' }); } }
 
         refreshWindows();
         lucide.createIcons();

@@ -331,6 +331,31 @@ func ShutdownPC() error {
 	return nil
 }
 
+// RestartPC restarts the computer
+func RestartPC() error {
+	if runtime.GOOS == "windows" {
+		return exec.Command("shutdown", "/r", "/t", "60").Run()
+	}
+	return nil
+}
+
+// SleepPC puts the computer to sleep
+func SleepPC() error {
+	if runtime.GOOS == "windows" {
+		// Use rundll32 for sleep
+		return exec.Command("rundll32.exe", "powprof.dll,SetSuspendState", "0,1,0").Run()
+	}
+	return nil
+}
+
+// LockPC locks the computer
+func LockPC() error {
+	if runtime.GOOS == "windows" {
+		return exec.Command("rundll32.exe", "user32.dll,LockWorkStation").Run()
+	}
+	return nil
+}
+
 // SnapWindow moves and resizes a window based on a position string
 func SnapWindow(handle string, position string) error {
 	var hwnd uintptr
