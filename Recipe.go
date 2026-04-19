@@ -3,7 +3,6 @@ package bake_recipe
 
 import (
 	"fmt"
-	"runtime"
 	"github.com/fezcode/gobake"
 )
 
@@ -12,12 +11,16 @@ func Run(bake *gobake.Engine) error {
 		return err
 	}
 
-	bake.Task("build", "Builds the binary for the current platform", func(ctx *gobake.Context) error {
+	bake.Task("build", "Builds the binary for Windows", func(ctx *gobake.Context) error {
 		ctx.Log("Building %s v%s...", bake.Info.Name, bake.Info.Version)
 
-		output := "build/atlas.pilot"
-		if runtime.GOOS == "windows" {
-			output += ".exe"
+		// Restricted to Windows as robotgo/win dependencies are platform-specific
+		targets := []struct {
+			os   string
+			arch string
+		}{
+			{"windows", "amd64"},
+			{"windows", "arm64"},
 		}
 
 		err := ctx.Mkdir("build")
@@ -26,10 +29,21 @@ func Run(bake *gobake.Engine) error {
 		}
 
 		ldflags := fmt.Sprintf("-X main.Version=%s", bake.Info.Version)
-		
-		err = ctx.Run("go", "build", "-ldflags", ldflags, "-o", output, ".")
-		if err != nil {
-			return err
+
+		for _, t := range targets {
+			output := "build/" + bake.Info.Name + "-" + t.os + "-" + t.arch + ".exe"
+
+			ctx.Env = []string{
+				"GOOS=" + t.os,
+				"GOARCH=" + t.arch,
+			}
+
+			ctx.Log("Building target: %s/%s", t.os, t.arch)
+			err := ctx.Run("go", "build", "-ldflags", ldflags, "-o", output, ".")
+			if err != nil {
+				ctx.Log("Warning: Failed to build for %s/%s: %v", t.os, t.arch, err)
+				continue
+			}
 		}
 		return nil
 	})

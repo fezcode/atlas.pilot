@@ -3,6 +3,8 @@
 ![Atlas Pilot Banner](banner-image.png)
 
 > **Premium remote PC pilot.** Steering your computer from your pocket has never looked this good.
+>
+> ⚠️ **Note**: Atlas Pilot is currently in its early stages and is **Windows only**. Multi-platform support is planned for future releases.
 
 Atlas Pilot is a sophisticated, mobile-optimized remote control center for your PC. Built for the **Atlas Suite**, it provides a high-performance bridge between your phone and your desktop over Wi-Fi, wrapped in a premium Sleek Dark UI.
 
