@@ -79,4 +79,3 @@ gobake build
 ## 📦 Project Info
 - **Version**: 0.5.4
 - **License**: MIT
-- **Suite**: Part of the [Atlas Suite](https://github.com/fezcode/atlas)
