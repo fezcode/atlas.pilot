@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Window Controller</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8 flex justify-between items-start">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Atlas Window Controller</h1>
+                <p class="text-gray-600">Connected to: 
+                    {{range .IPs}}
+                    <span class="font-mono bg-white px-2 rounded border mr-2 text-xs md:text-sm">{{.}}:5000</span>
+                    {{end}}
+                </p>
+            </div>
+            <button onclick="shutdownPC()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors">Shutdown PC</button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="space-y-8">
+                <section class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">System Controls</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Volume</label>
+                            <input type="range" min="0" max="100" value="50" onchange="setVolume(this.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Launch App</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="openCommand" placeholder="notepad, chrome..." class="flex-grow border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
+                                <button onclick="openApp()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-4 rounded text-sm transition-colors">Run</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">Clipboard Sync</h2>
+                    <div class="space-y-4">
+                        <textarea id="clipboardArea" rows="4" class="w-full border rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="PC Clipboard content will appear here..."></textarea>
+                        <div class="flex gap-2">
+                            <button onclick="getClipboard()" class="flex-grow bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded text-sm transition-colors">Get from PC</button>
+                            <button onclick="setClipboard()" class="flex-grow bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded text-sm transition-colors">Set to PC</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h2 class="text-xl font-semibold">Active Windows</h2>
+                    <button onclick="refreshWindows()" class="text-blue-500 hover:text-blue-700 font-medium text-sm">Refresh</button>
+                </div>
+                <div id="windowList" class="space-y-3 max-h-[600px] overflow-y-auto">
+                    <p class="text-gray-400 italic">Loading windows...</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        async function refreshWindows() {
+            const list = document.getElementById('windowList');
+            try {
+                const response = await fetch('/api/windows');
+                const windows = await response.json();
+                
+                if (windows.length === 0) {
+                    list.innerHTML = '<p class="text-gray-400 italic">No visible windows found.</p>';
+                    return;
+                }
+
+                windows.sort((a, b) => {
+                    if (a.controllable && !b.controllable) return -1;
+                    if (!a.controllable && b.controllable) return 1;
+                    return a.title.localeCompare(b.title);
+                });
+
+                list.innerHTML = windows.map(win => `
+                    <div class="border rounded p-3 ${win.controllable ? 'bg-white' : 'bg-gray-50 opacity-60'} transition-colors">
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center truncate mr-2">
+                                    <span class="w-2 h-2 min-w-[8px] rounded-full mr-2 ${win.controllable ? 'bg-green-500' : 'bg-gray-400'}"></span>
+                                    <span class="font-medium text-gray-800 truncate text-xs" title="${win.title}">${win.title}</span>
+                                </div>
+                                <button onclick="closeWindow('${win.handle}')" class="text-red-500 hover:text-red-700 text-[10px] font-bold">Close</button>
+                            </div>
+                            
+                            ${win.controllable ? `
+                            <div class="space-y-2">
+                                <div class="flex flex-wrap items-center gap-1">
+                                    <button onclick="focusWindow('${win.handle}')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-2 py-1 rounded text-[10px] font-bold">Focus</button>
+                                    <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded text-[10px] font-bold">🖥️ Next</button>
+                                    <div class="flex gap-1 bg-gray-100 p-1 rounded">
+                                        <button onclick="snapWindow('${win.handle}', 'top-left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Top Left">↖️</button>
+                                        <button onclick="snapWindow('${win.handle}', 'top-right')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Top Right">↗️</button>
+                                        <button onclick="snapWindow('${win.handle}', 'bottom-left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Bottom Left">↙️</button>
+                                        <button onclick="snapWindow('${win.handle}', 'bottom-right')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Bottom Right">↘️</button>
+                                        <button onclick="snapWindow('${win.handle}', 'left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Left Half">⬅️</button>
+                                        <button onclick="snapWindow('${win.handle}', 'right')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Right Half">➡️</button>
+                                        <button onclick="snapWindow('${win.handle}', 'full')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Fullscreen">🔲</button>
+                                        <button onclick="snapWindow('${win.handle}', 'center')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Center">🎯</button>
+                                    </div>
+                                </div>
+                                <div class="flex gap-1">
+                                    <input type="text" id="type-${win.handle}" placeholder="Type here..." class="flex-grow border rounded px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-blue-400">
+                                    <button onclick="typeString('${win.handle}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">Type</button>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                list.innerHTML = '<p class="text-red-500">Error fetching windows.</p>';
+            }
+        }
+
+        async function focusWindow(handle) {
+            await fetch('/api/focus', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ handle })
+            });
+        }
+
+        async function snapWindow(handle, position) {
+            await fetch('/api/snap', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ handle, position })
+            });
+            if (position === 'next-monitor') setTimeout(refreshWindows, 500);
+        }
+
+        async function closeWindow(handle) {
+            if (confirm('Close this window?')) {
+                await fetch('/api/close', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ handle })
+                });
+                setTimeout(refreshWindows, 500);
+            }
+        }
+
+        async function typeString(handle) {
+            const input = document.getElementById(`type-${handle}`);
+            const text = input.value;
+            if (!text) return;
+            await fetch('/api/type', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ handle, text })
+            });
+            input.value = '';
+        }
+
+        async function getClipboard() {
+            const response = await fetch('/api/clipboard/get');
+            const data = await response.json();
+            document.getElementById('clipboardArea').value = data.text;
+        }
+
+        async function setClipboard() {
+            const text = document.getElementById('clipboardArea').value;
+            await fetch('/api/clipboard/set', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ text })
+            });
+            alert('Clipboard set on PC.');
+        }
+
+        async function openApp() {
+            const command = document.getElementById('openCommand').value;
+            if (!command) return;
+            await fetch('/api/open', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ command })
+            });
+            document.getElementById('openCommand').value = '';
+            setTimeout(refreshWindows, 1000);
+        }
+
+        async function setVolume(level) {
+            await fetch('/api/volume', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ level: parseInt(level) })
+            });
+        }
+
+        async function shutdownPC() {
+            if (confirm('Shutdown PC in 60 seconds?')) {
+                await fetch('/api/shutdown', { method: 'POST' });
+                alert('Shutdown scheduled.');
+            }
+        }
+
+        refreshWindows();
+        setInterval(refreshWindows, 10000);
+    </script>
+</body>
+</html>

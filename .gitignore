@@ -1,0 +1,7 @@
+build/
+*.exe
+.idea/
+vendor/
+go.sum
+robotgo_doc.txt
+robotgo_window_doc.txt
