@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"atlas.windowcontroller/window"
+	"atlas.pilot/window"
 )
 
 //go:embed templates/*
@@ -41,12 +41,12 @@ func main() {
 	// Basic flag handling
 	if len(os.Args) > 1 {
 		if os.Args[1] == "-v" || os.Args[1] == "--version" {
-			fmt.Printf("atlas.windowcontroller v%s\n", Version)
+			fmt.Printf("atlas.pilot v%s\n", Version)
 			return
 		}
 		if os.Args[1] == "-h" || os.Args[1] == "--help" {
-			fmt.Println("Atlas Window Controller")
-			fmt.Println("Usage: atlas.windowcontroller [flags]")
+			fmt.Println("Atlas Pilot - Premium remote PC controller")
+			fmt.Println("Usage: atlas.pilot [flags]")
 			fmt.Println("\nFlags:")
 			fmt.Println("  -v, --version  Show version")
 			fmt.Println("  -h, --help     Show help")
@@ -87,7 +87,7 @@ func main() {
 
 	port := "5000"
 	ips := getLocalIPs()
-	fmt.Printf("Server starting at:\n")
+	fmt.Printf("Atlas Pilot starting at:\n")
 	for _, ip := range ips {
 		fmt.Printf("  http://%s:%s\n", ip, port)
 	}

@@ -15,7 +15,7 @@ func Run(bake *gobake.Engine) error {
 	bake.Task("build", "Builds the binary for the current platform", func(ctx *gobake.Context) error {
 		ctx.Log("Building %s v%s...", bake.Info.Name, bake.Info.Version)
 
-		output := "build/atlas.windowcontroller"
+		output := "build/atlas.pilot"
 		if runtime.GOOS == "windows" {
 			output += ".exe"
 		}

@@ -1,4 +1,4 @@
-module atlas.windowcontroller
+module atlas.pilot
 
 go 1.25.3
 

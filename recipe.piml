@@ -1,4 +1,4 @@
-(name) atlas.windowcontroller
-(version) 0.5.0
-(description) Cross-platform window manager and WiFi controller.
+(name) atlas.pilot
+(version) 0.5.1
+(description) Premium remote PC pilot - Control windows, mouse, and system over WiFi.
 (license) MIT
