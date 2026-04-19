@@ -2,111 +2,217 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atlas Window Controller</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #e0e5ec;
+            --shadow-light: rgba(255, 255, 255, 0.8);
+            --shadow-dark: rgba(163, 177, 198, 0.6);
+            --accent-blue: #4f46e5;
+            --accent-red: #ef4444;
+            --accent-emerald: #10b981;
+            --accent-orange: #f59e0b;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Inter', sans-serif;
+            color: #4a5568;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nm-flat {
+            background: var(--bg-color);
+            box-shadow: 9px 9px 16px var(--shadow-dark), -9px -9px 16px var(--shadow-light);
+            border-radius: 20px;
+        }
+
+        .nm-inset {
+            background: var(--bg-color);
+            box-shadow: inset 6px 6px 10px var(--shadow-dark), inset -6px -6px 10px var(--shadow-light);
+            border-radius: 20px;
+        }
+
+        .nm-btn {
+            background: var(--bg-color);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nm-btn:active {
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+            transform: scale(0.98);
+        }
+
+        .nm-btn-danger { color: var(--accent-red); }
+        .nm-btn-primary { color: var(--accent-blue); }
+        .nm-btn-success { color: var(--accent-emerald); }
+        .nm-btn-warning { color: var(--accent-orange); }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: var(--bg-color);
+            border-radius: 5px;
+            box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            cursor: pointer;
+            border: 2px solid #fff;
+        }
+
+        .modal-blur {
+            backdrop-filter: blur(8px);
+            background-color: rgba(224, 229, 236, 0.7);
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--shadow-dark); border-radius: 10px; }
+
+        .pulse {
+            width: 10px; height: 10px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-2 md:p-8">
-    <div class="max-w-4xl mx-auto">
-        <header class="mb-4 md:mb-8 flex justify-between items-start">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Atlas Window Controller</h1>
-                <p class="text-gray-600 text-xs md:text-sm">Connected to: 
-                    {{range .IPs}}
-                    <span class="font-mono bg-white px-2 rounded border mr-2">{{.}}:5000</span>
-                    {{end}}
-                </p>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+    <div class="w-full max-w-4xl">
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="pulse"></div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-700 tracking-tight">Atlas Controller</h1>
+                    <div class="flex flex-wrap gap-2 mt-1">
+                        {{range .IPs}}
+                        <span class="text-[10px] font-mono nm-inset px-2 py-0.5 text-gray-500">{{.}}:5000</span>
+                        {{end}}
+                    </div>
+                </div>
             </div>
-            <button onclick="shutdownPC()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded text-xs md:text-sm transition-colors">Shutdown PC</button>
+            <button onclick="shutdownPC()" class="nm-btn nm-btn-danger px-6 py-2 font-bold text-sm">
+                Shutdown System
+            </button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-8">
-            <div class="space-y-4 md:space-y-8">
-                <section class="bg-white rounded-lg shadow-md p-4 md:p-6">
-                    <h2 class="text-lg md:text-xl font-semibold mb-4 border-b pb-2">System Controls</h2>
-                    <div class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-8">
+                <section class="nm-flat p-6">
+                    <h2 class="text-lg font-bold text-gray-600 mb-6 uppercase tracking-wider text-sm">System Tuning</h2>
+                    <div class="space-y-8">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Volume</label>
-                            <input type="range" min="0" max="100" value="50" onchange="setVolume(this.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between mb-2 px-1">
+                                <span class="text-xs font-bold text-gray-500 uppercase">Volume</span>
+                                <span id="volumeVal" class="text-xs font-mono text-indigo-600 font-bold">50%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" oninput="document.getElementById('volumeVal').innerText = this.value + '%'" onchange="setVolume(this.value)">
                         </div>
+                        
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Launch App</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="openCommand" placeholder="notepad, chrome..." class="flex-grow border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
-                                <button onclick="openApp()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-4 rounded text-sm transition-colors">Run</button>
+                            <span class="text-xs font-bold text-gray-500 uppercase block mb-3 px-1">Quick Launch</span>
+                            <div class="flex gap-3">
+                                <input type="text" id="openCommand" placeholder="notepad, chrome..." class="nm-inset flex-grow bg-transparent px-4 py-2 text-sm focus:outline-none">
+                                <button onclick="openApp()" class="nm-btn nm-btn-primary w-12 h-10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section class="bg-white rounded-lg shadow-md p-4 md:p-6">
-                    <h2 class="text-lg md:text-xl font-semibold mb-4 border-b pb-2">Clipboard Sync</h2>
+                <section class="nm-flat p-6">
+                    <h2 class="text-lg font-bold text-gray-600 mb-6 uppercase tracking-wider text-sm">Universal Clipboard</h2>
                     <div class="space-y-4">
-                        <textarea id="clipboardArea" rows="3" class="w-full border rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Clipboard..."></textarea>
-                        <div class="flex gap-2">
-                            <button onclick="getClipboard()" class="flex-grow bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded text-xs md:text-sm">Get from PC</button>
-                            <button onclick="setClipboard()" class="flex-grow bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-2 rounded text-xs md:text-sm">Set to PC</button>
+                        <textarea id="clipboardArea" rows="4" class="nm-inset w-full bg-transparent p-4 text-sm focus:outline-none resize-none custom-scroll" placeholder="Sync text with PC..."></textarea>
+                        <div class="flex gap-4">
+                            <button onclick="getClipboard()" class="nm-btn flex-grow py-3 text-xs font-bold text-indigo-600 uppercase tracking-widest">Pull From PC</button>
+                            <button onclick="setClipboard()" class="nm-btn flex-grow py-3 text-xs font-bold text-emerald-600 uppercase tracking-widest">Push To PC</button>
                         </div>
                     </div>
                 </section>
             </div>
 
-            <section class="bg-white rounded-lg shadow-md p-4 md:p-6">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h2 class="text-lg md:text-xl font-semibold">Active Windows</h2>
-                    <button onclick="refreshWindows()" class="text-blue-500 hover:text-blue-700 font-medium text-sm">Refresh</button>
+            <section class="nm-flat p-6 flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-bold text-gray-600 uppercase tracking-wider text-sm">Active Windows</h2>
+                    <button onclick="refreshWindows()" class="nm-btn p-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
                 </div>
-                <div id="windowList" class="space-y-3 max-h-[600px] overflow-y-auto">
-                    <p class="text-gray-400 italic">Loading windows...</p>
+                <div id="windowList" class="space-y-4 overflow-y-auto max-h-[600px] pr-2 custom-scroll pb-4">
+                    <p class="text-center py-8 text-gray-400 italic text-sm">Loading windows...</p>
                 </div>
             </section>
         </div>
     </div>
 
-    <!-- Screenshot Modal -->
-    <div id="screenshotModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-2 md:p-4 z-50">
-        <div class="bg-white rounded-lg max-w-full max-h-full overflow-hidden flex flex-col shadow-2xl">
-            <div class="p-2 border-b flex justify-between items-center bg-gray-50">
-                <span id="modalTitle" class="font-bold truncate mr-4 text-sm md:text-base text-gray-700">Screenshot</span>
-                <button onclick="closeScreenshotModal()" class="text-gray-500 hover:text-red-500 font-bold px-3 py-1 text-xl">✕</button>
+    <!-- Modals -->
+    <div id="screenshotModal" class="hidden fixed inset-0 modal-blur flex items-center justify-center p-4 z-50">
+        <div class="nm-flat w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-gray-300 flex justify-between items-center">
+                <span id="modalTitle" class="font-bold text-gray-600 truncate mr-4">Preview</span>
+                <button onclick="closeScreenshotModal()" class="nm-btn nm-btn-danger w-8 h-8 font-bold">✕</button>
             </div>
-            <div class="overflow-auto p-2 bg-gray-200">
-                <img id="screenshotImg" src="" alt="Screenshot" class="max-w-full h-auto mx-auto shadow-lg">
+            <div class="overflow-auto p-4 bg-gray-100 flex-grow">
+                <img id="screenshotImg" src="" alt="Screenshot" class="max-w-full h-auto mx-auto rounded-lg shadow-lg">
             </div>
         </div>
     </div>
 
-    <!-- Keyboard Modal -->
-    <div id="keyboardModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-2 md:p-4 z-50">
-        <div class="bg-white rounded-lg w-full max-w-md flex flex-col shadow-2xl">
-            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
-                <span id="keyboardModalTitle" class="font-bold truncate text-gray-700">Keyboard Control</span>
-                <button onclick="closeKeyboardModal()" class="text-gray-500 hover:text-red-500 font-bold px-2 text-xl">✕</button>
+    <div id="keyboardModal" class="hidden fixed inset-0 modal-blur flex items-center justify-center p-4 z-50">
+        <div class="nm-flat w-full max-w-md p-6 space-y-6">
+            <div class="flex justify-between items-center">
+                <span id="keyboardModalTitle" class="font-bold text-gray-600 truncate">Keyboard Input</span>
+                <button onclick="closeKeyboardModal()" class="nm-btn nm-btn-danger w-8 h-8 font-bold">✕</button>
             </div>
-            <div class="p-4 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Text Input</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="keyboardInput" class="flex-grow border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Type text here...">
-                        <button onclick="submitKeyboardText()" class="bg-blue-600 text-white font-bold px-4 py-2 rounded">Send</button>
-                    </div>
+            
+            <div class="space-y-6">
+                <div class="flex gap-3">
+                    <input type="text" id="keyboardInput" class="nm-inset flex-grow bg-transparent px-4 py-3 text-sm focus:outline-none" placeholder="Enter text...">
+                    <button onclick="submitKeyboardText()" class="nm-btn nm-btn-primary px-4 font-bold text-sm">Send</button>
                 </div>
                 
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Special Keys</label>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button onclick="sendKey('enter')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Enter</button>
-                        <button onclick="sendKey('backspace')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">BS</button>
-                        <button onclick="sendKey('tab')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Tab</button>
-                        <button onclick="sendKey('escape')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Esc</button>
-                        <button onclick="sendKey('up')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Up</button>
-                        <button onclick="sendKey('down')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Down</button>
-                        <button onclick="sendKey('left')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Left</button>
-                        <button onclick="sendKey('right')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Right</button>
-                        <button onclick="sendKey('space')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold col-span-2">Space</button>
-                        <button onclick="sendKey('f5')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">F5</button>
-                        <button onclick="sendKey('win')" class="bg-gray-200 hover:bg-gray-300 p-2 rounded text-sm font-bold">Win</button>
-                    </div>
+                <div class="grid grid-cols-4 gap-4">
+                    <button onclick="sendKey('enter')" class="nm-btn py-3 text-xs font-bold text-emerald-600">ENTER</button>
+                    <button onclick="sendKey('backspace')" class="nm-btn py-3 text-xs font-bold text-rose-500">BACK</button>
+                    <button onclick="sendKey('tab')" class="nm-btn py-3 text-xs font-bold text-gray-500">TAB</button>
+                    <button onclick="sendKey('escape')" class="nm-btn py-3 text-xs font-bold text-gray-500">ESC</button>
+                    <button onclick="sendKey('up')" class="nm-btn py-3 font-bold text-gray-500">▲</button>
+                    <button onclick="sendKey('down')" class="nm-btn py-3 font-bold text-gray-500">▼</button>
+                    <button onclick="sendKey('left')" class="nm-btn py-3 font-bold text-gray-500">◀</button>
+                    <button onclick="sendKey('right')" class="nm-btn py-3 font-bold text-gray-500">▶</button>
+                    <button onclick="sendKey('space')" class="nm-btn py-3 text-xs font-bold text-gray-500 col-span-2">SPACE</button>
+                    <button onclick="sendKey('f5')" class="nm-btn py-3 text-xs font-bold text-indigo-500">F5</button>
+                    <button onclick="sendKey('win')" class="nm-btn py-3 text-xs font-bold text-indigo-500">WIN</button>
                 </div>
             </div>
         </div>
@@ -122,7 +228,7 @@
                 const windows = await response.json();
                 
                 if (windows.length === 0) {
-                    list.innerHTML = '<p class="text-gray-400 italic text-sm">No visible windows found.</p>';
+                    list.innerHTML = '<p class="text-center py-8 text-gray-400 italic text-sm">No active windows found.</p>';
                     return;
                 }
 
@@ -133,28 +239,34 @@
                 });
 
                 list.innerHTML = windows.map(win => `
-                    <div class="border rounded p-3 ${win.controllable ? 'bg-white' : 'bg-gray-50 opacity-60'} transition-colors shadow-sm">
-                        <div class="flex flex-col gap-2">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center truncate mr-2">
-                                    <span class="w-2 h-2 min-w-[8px] rounded-full mr-2 ${win.controllable ? 'bg-green-500' : 'bg-gray-400'}"></span>
-                                    <span class="font-medium text-gray-800 truncate text-xs" title="${win.title}">${win.title}</span>
+                    <div class="nm-flat p-4 group transition-all duration-300">
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex items-center min-w-0 flex-grow">
+                                    <div class="w-2 h-2 rounded-full mr-2 shrink-0 ${win.controllable ? 'bg-emerald-500' : 'bg-gray-300'}"></div>
+                                    <span class="font-bold text-gray-600 truncate text-xs uppercase tracking-tight" title="${win.title}">${win.title}</span>
                                 </div>
-                                <button onclick="closeWindow('${win.handle}')" class="text-red-500 hover:text-red-700 text-[10px] font-bold px-1">Close</button>
+                                <button onclick="closeWindow('${win.handle}')" class="nm-btn w-8 h-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
                             
                             ${win.controllable ? `
-                            <div class="flex flex-wrap items-center gap-1">
-                                <button onclick="focusWindow('${win.handle}')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-2 py-1 rounded text-[10px] font-bold">Focus</button>
-                                <button onclick="openKeyboardModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-[10px] font-bold">⌨️ Keyboard</button>
-                                <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="bg-blue-400 hover:bg-blue-500 text-white px-2 py-1 rounded text-[10px] font-bold">📸 SS</button>
-                                <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded text-[10px] font-bold">🖥️ Next</button>
-                                <div class="flex gap-1 bg-gray-100 p-1 rounded">
-                                    <button onclick="snapWindow('${win.handle}', 'top-left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Top Left">↖️</button>
-                                    <button onclick="snapWindow('${win.handle}', 'top-right')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Top Right">↗️</button>
-                                    <button onclick="snapWindow('${win.handle}', 'bottom-left')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Bottom Left">↙️</button>
-                                    <button onclick="snapWindow('${win.handle}', 'bottom-right')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Bottom Right">↘️</button>
-                                    <button onclick="snapWindow('${win.handle}', 'full')" class="hover:bg-gray-200 p-1 rounded text-[10px]" title="Fullscreen">🔲</button>
+                            <div class="flex flex-col gap-3">
+                                <div class="flex flex-wrap gap-2">
+                                    <button onclick="focusWindow('${win.handle}')" class="nm-btn px-4 py-2 text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Focus</button>
+                                    <button onclick="openKeyboardModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="nm-btn px-4 py-2 text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Input</button>
+                                    <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="nm-btn px-4 py-2 text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest">Snap</button>
+                                    <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="nm-btn px-4 py-2 text-[10px] font-extrabold text-orange-500 uppercase tracking-widest">Move</button>
+                                </div>
+                                <div class="nm-inset p-2 flex justify-between">
+                                    <button onclick="snapWindow('${win.handle}', 'top-left')" class="p-2 nm-btn w-9 h-9" title="Top Left">↖️</button>
+                                    <button onclick="snapWindow('${win.handle}', 'top-right')" class="p-2 nm-btn w-9 h-9" title="Top Right">↗️</button>
+                                    <button onclick="snapWindow('${win.handle}', 'bottom-left')" class="p-2 nm-btn w-9 h-9" title="Bottom Left">↙️</button>
+                                    <button onclick="snapWindow('${win.handle}', 'bottom-right')" class="p-2 nm-btn w-9 h-9" title="Bottom Right">↘️</button>
+                                    <button onclick="snapWindow('${win.handle}', 'full')" class="p-2 nm-btn w-9 h-9" title="Fullscreen">🔲</button>
                                 </div>
                             </div>
                             ` : ''}
@@ -162,15 +274,14 @@
                     </div>
                 `).join('');
             } catch (error) {
-                list.innerHTML = '<p class="text-red-500 text-sm">Error fetching windows.</p>';
+                list.innerHTML = '<p class="text-red-400 text-center py-4">API connection failed.</p>';
             }
         }
 
         function openKeyboardModal(handle, title) {
             currentHandle = handle;
-            document.getElementById('keyboardModalTitle').innerText = `Keyboard: ${title}`;
+            document.getElementById('keyboardModalTitle').innerText = title;
             document.getElementById('keyboardModal').classList.remove('hidden');
-            document.getElementById('keyboardInput').focus();
         }
 
         function closeKeyboardModal() {
@@ -180,13 +291,11 @@
 
         async function submitKeyboardText() {
             const input = document.getElementById('keyboardInput');
-            const text = input.value;
-            if (!text || !currentHandle) return;
-            
+            if (!input.value || !currentHandle) return;
             await fetch('/api/type', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ handle: currentHandle, text })
+                body: JSON.stringify({ handle: currentHandle, text: input.value })
             });
             input.value = '';
         }
@@ -200,12 +309,10 @@
             });
         }
 
-        // Keep screenshot and existing functions
         async function takeScreenshot(handle, title) {
             const img = document.getElementById('screenshotImg');
             const modal = document.getElementById('screenshotModal');
-            const modalTitle = document.getElementById('modalTitle');
-            modalTitle.innerText = `Screenshot: ${title}`;
+            document.getElementById('modalTitle').innerText = title;
             img.src = `/api/screenshot?handle=${handle}&t=${Date.now()}`;
             modal.classList.remove('hidden');
         }
@@ -232,7 +339,7 @@
         }
 
         async function closeWindow(handle) {
-            if (confirm('Close this window?')) {
+            if (confirm('Terminate window?')) {
                 await fetch('/api/close', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -243,28 +350,26 @@
         }
 
         async function getClipboard() {
-            const response = await fetch('/api/clipboard/get');
-            const data = await response.json();
+            const res = await fetch('/api/clipboard/get');
+            const data = await res.json();
             document.getElementById('clipboardArea').value = data.text;
         }
 
         async function setClipboard() {
-            const text = document.getElementById('clipboardArea').value;
             await fetch('/api/clipboard/set', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ text })
+                body: JSON.stringify({ text: document.getElementById('clipboardArea').value })
             });
-            alert('Clipboard set on PC.');
         }
 
         async function openApp() {
-            const command = document.getElementById('openCommand').value;
-            if (!command) return;
+            const cmd = document.getElementById('openCommand').value;
+            if (!cmd) return;
             await fetch('/api/open', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ command })
+                body: JSON.stringify({ command: cmd })
             });
             document.getElementById('openCommand').value = '';
             setTimeout(refreshWindows, 1000);
@@ -279,9 +384,8 @@
         }
 
         async function shutdownPC() {
-            if (confirm('Shutdown PC in 60 seconds?')) {
+            if (confirm('Initiate system shutdown?')) {
                 await fetch('/api/shutdown', { method: 'POST' });
-                alert('Shutdown scheduled.');
             }
         }
 
