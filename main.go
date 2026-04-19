@@ -67,6 +67,8 @@ func main() {
 	http.HandleFunc("/api/clipboard/set", handleSetClipboard)
 	http.HandleFunc("/api/screenshot", handleScreenshot)
 	http.HandleFunc("/api/paste", handlePaste)
+	http.HandleFunc("/api/maximize", handleMaximizeWindow)
+	http.HandleFunc("/api/minimize", handleMinimizeWindow)
 
 	// Serve static files from embedded FS
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(templatesFS))))
@@ -123,6 +125,44 @@ func handleFocusWindow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := window.FocusWindow(req.Handle); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleMaximizeWindow(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		Handle string `json:"handle"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := window.MaximizeWindow(req.Handle); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleMinimizeWindow(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		Handle string `json:"handle"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := window.MinimizeWindow(req.Handle); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

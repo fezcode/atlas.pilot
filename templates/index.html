@@ -39,6 +39,7 @@
         .gap-2 { gap: 0.5rem; }
         .gap-3 { gap: 0.75rem; }
         .gap-4 { gap: 1rem; }
+        .gap-5 { gap: 1.25rem; }
         .gap-6 { gap: 1.5rem; }
         .gap-8 { gap: 2rem; }
         .grid { display: grid; }
@@ -46,19 +47,27 @@
         .grow { flex-grow: 1; }
         .shrink-0 { flex-shrink: 0; }
         .hidden { display: none !important; }
+        .p-1 { padding: 0.25rem; }
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 0.75rem; }
         .p-4 { padding: 1rem; }
         .p-5 { padding: 1.25rem; }
         .p-6 { padding: 1.5rem; }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
         .px-4 { padding-left: 1rem; padding-right: 1rem; }
         .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
         .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
         .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
         .mb-2 { margin-bottom: 0.5rem; }
         .mb-4 { margin-bottom: 1rem; }
         .mb-6 { margin-bottom: 1.5rem; }
-        .mb-8 { margin-bottom: 2rem; }
         .mb-10 { margin-bottom: 2.5rem; }
+        .mt-1 { margin-top: 0.25rem; }
         .mt-2 { margin-top: 0.5rem; }
+        .pt-4 { padding-top: 1rem; }
         .rounded-lg { border-radius: 8px; }
         .rounded-xl { border-radius: 12px; }
         .rounded-full { border-radius: 9999px; }
@@ -90,7 +99,7 @@
         .btn {
             cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center;
             font-weight: 700; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 12px; padding: 0.5rem 1rem;
+            border-radius: 12px; padding: 0.5rem 1rem; text-decoration: none;
         }
         .btn-primary {
             background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
@@ -209,6 +218,7 @@
         </div>
     </div>
 
+    <!-- Modals -->
     <div id="screenshotModal" class="hidden modal-overlay">
         <div class="glass-card w-full flex flex-col" style="max-width: 1024px; max-height: 90vh; overflow: hidden;">
             <div class="p-4 flex justify-between items-center bg-zinc-900/50" style="border-bottom: 1px solid var(--border-color);">
@@ -248,8 +258,55 @@
         </div>
     </div>
 
+    <!-- Window Management Modal -->
+    <div id="manageModal" class="hidden modal-overlay">
+        <div class="glass-card w-full p-6 flex flex-col gap-6" style="max-width: 448px;">
+            <div class="flex justify-between items-center">
+                <h3 id="manageModalTitle" class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Manage Window</h3>
+                <button onclick="closeManageModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
+            </div>
+            
+            <div class="flex flex-col gap-6">
+                <!-- Basic State -->
+                <div class="flex flex-col gap-3">
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Visibility & State</span>
+                    <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                        <button onclick="focusWindow(currentHandle)" class="btn btn-secondary py-3 text-xs font-bold" style="color: #818cf8;">Focus</button>
+                        <button onclick="maximizeWindow(currentHandle)" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--success);">Maximize</button>
+                        <button onclick="minimizeWindow(currentHandle)" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--warning);">Minimize</button>
+                    </div>
+                </div>
+
+                <!-- Position & Monitor -->
+                <div class="flex flex-col gap-3">
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Layout & Display</span>
+                    <div class="flex flex-col gap-2">
+                        <button onclick="snapWindow(currentHandle, 'next-monitor')" class="btn btn-primary py-3 text-xs font-bold gap-2">
+                            <i data-lucide="monitor-forward" style="width: 16px; height: 16px;"></i> MOVE TO OTHER MONITOR
+                        </button>
+                        <div class="grid" style="grid-template-columns: repeat(5, 1fr); gap: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 12px;">
+                            <button onclick="snapWindow(currentHandle, 'top-left')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-up-left" style="width: 18px; height: 18px; color: #71717a;"></i></button>
+                            <button onclick="snapWindow(currentHandle, 'top-right')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-up-right" style="width: 18px; height: 18px; color: #71717a;"></i></button>
+                            <button onclick="snapWindow(currentHandle, 'bottom-left')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-down-left" style="width: 18px; height: 18px; color: #71717a;"></i></button>
+                            <button onclick="snapWindow(currentHandle, 'bottom-right')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-down-right" style="width: 18px; height: 18px; color: #71717a;"></i></button>
+                            <button onclick="snapWindow(currentHandle, 'full')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="maximize" style="width: 18px; height: 18px; color: #71717a;"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="pt-4 border-t border-zinc-800">
+                    <button onclick="closeWindow(currentHandle); closeManageModal();" class="btn btn-danger w-full py-3 text-xs font-bold gap-2">
+                        <i data-lucide="x-circle" style="width: 14px; height: 14px;"></i> TERMINATE PROCESS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentHandle = null;
+
         async function refreshWindows() {
             const list = document.getElementById('windowList');
             try {
@@ -268,24 +325,16 @@
                                     <div class="status-pulse shrink-0" style="width: 8px; height: 8px; margin-right: 0.75rem; background: ${win.controllable ? 'var(--success)' : '#3f3f46'};"></div>
                                     <span class="font-bold truncate text-xs uppercase tracking-wide" style="color: #f4f4f5;">${win.title}</span>
                                 </div>
-                                <button onclick="closeWindow('${win.handle}')" style="background:none;border:none;cursor:pointer;color:#52525b;"><i data-lucide="x-circle" style="width: 20px; height: 20px;"></i></button>
+                                <div class="flex gap-2">
+                                    ${win.controllable ? `<button onclick="openManageModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" style="background:none;border:none;cursor:pointer;color:#52525b;"><i data-lucide="settings" style="width: 18px; height: 18px;"></i></button>` : ''}
+                                    <button onclick="closeWindow('${win.handle}')" style="background:none;border:none;cursor:pointer;color:#52525b;"><i data-lucide="x-circle" style="width: 18px; height: 18px;"></i></button>
+                                </div>
                             </div>
                             ${win.controllable ? `
-                            <div class="flex flex-col gap-4">
-                                <div class="flex gap-2" style="flex-wrap: wrap;">
-                                    <button onclick="focusWindow('${win.handle}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest" style="font-size: 9px; color: #818cf8;">Focus</button>
-                                    <button onclick="openKeyboardModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest gap-2" style="font-size: 9px;"><i data-lucide="keyboard" style="width: 12px; height: 12px;"></i> Type</button>
-                                    <button onclick="quickPaste('${win.handle}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest gap-2" style="font-size: 9px; color: var(--success);"><i data-lucide="clipboard-paste" style="width: 12px; height: 12px;"></i> Paste</button>
-                                    <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest" style="font-size: 9px; color: var(--success);">Snap</button>
-                                    <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest" style="font-size: 9px; color: var(--warning);">Move</button>
-                                </div>
-                                <div class="flex gap-2 p-1 rounded-xl justify-center" style="background: rgba(0,0,0,0.2);">
-                                    <button onclick="snapWindow('${win.handle}', 'top-left')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-up-left" style="width: 16px; height: 16px; color: #71717a;"></i></button>
-                                    <button onclick="snapWindow('${win.handle}', 'top-right')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-up-right" style="width: 16px; height: 16px; color: #71717a;"></i></button>
-                                    <button onclick="snapWindow('${win.handle}', 'bottom-left')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-down-left" style="width: 16px; height: 16px; color: #71717a;"></i></button>
-                                    <button onclick="snapWindow('${win.handle}', 'bottom-right')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-down-right" style="width: 16px; height: 16px; color: #71717a;"></i></button>
-                                    <button onclick="snapWindow('${win.handle}', 'full')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="maximize" style="width: 16px; height: 16px; color: #71717a;"></i></button>
-                                </div>
+                            <div class="flex gap-2" style="flex-wrap: wrap;">
+                                <button onclick="openKeyboardModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest gap-2 grow" style="font-size: 9px;"><i data-lucide="keyboard" style="width: 12px; height: 12px;"></i> Type</button>
+                                <button onclick="quickPaste('${win.handle}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest gap-2 grow" style="font-size: 9px; color: var(--success);"><i data-lucide="clipboard-paste" style="width: 12px; height: 12px;"></i> Paste</button>
+                                <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest grow" style="font-size: 9px; color: var(--success);"><i data-lucide="camera" style="width: 12px; height: 12px; margin-right: 4px;"></i> SS</button>
                             </div>` : ''}
                         </div>
                     </div>
@@ -296,6 +345,13 @@
 
         function openKeyboardModal(handle, title) { currentHandle = handle; document.getElementById('keyboardModalTitle').innerText = title; document.getElementById('keyboardModal').classList.remove('hidden'); lucide.createIcons(); }
         function closeKeyboardModal() { document.getElementById('keyboardModal').classList.add('hidden'); currentHandle = null; }
+
+        function openManageModal(handle, title) { currentHandle = handle; document.getElementById('manageModalTitle').innerText = title; document.getElementById('manageModal').classList.remove('hidden'); lucide.createIcons(); }
+        function closeManageModal() { document.getElementById('manageModal').classList.add('hidden'); currentHandle = null; }
+
+        async function maximizeWindow(handle) { if(!handle) return; await fetch('/api/maximize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
+        async function minimizeWindow(handle) { if(!handle) return; await fetch('/api/minimize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
+
         async function submitKeyboardText() {
             const input = document.getElementById('keyboardInput');
             if (!input.value || !currentHandle) return;
@@ -313,9 +369,9 @@
             modal.classList.remove('hidden');
         }
         function closeScreenshotModal() { document.getElementById('screenshotModal').classList.add('hidden'); }
-        async function focusWindow(handle) { await fetch('/api/focus', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
-        async function snapWindow(handle, position) { await fetch('/api/snap', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle, position }) }); if (position === 'next-monitor') setTimeout(refreshWindows, 500); }
-        async function closeWindow(handle) { if (confirm('Terminate window?')) { await fetch('/api/close', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); setTimeout(refreshWindows, 500); } }
+        async function focusWindow(handle) { if(!handle) return; await fetch('/api/focus', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
+        async function snapWindow(handle, position) { if(!handle) return; await fetch('/api/snap', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle, position }) }); if (position === 'next-monitor') setTimeout(refreshWindows, 500); }
+        async function closeWindow(handle) { if(!handle) return; if (confirm('Terminate window?')) { await fetch('/api/close', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); setTimeout(refreshWindows, 500); } }
         async function getClipboard() { try { const res = await fetch('/api/clipboard/get'); const data = await res.json(); document.getElementById('clipboardArea').value = data.text; } catch (e) { console.error(e); } }
         async function setClipboard() { await fetch('/api/clipboard/set', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ text: document.getElementById('clipboardArea').value }) }); }
         async function openApp() { const cmd = document.getElementById('openCommand').value; if (!cmd) return; await fetch('/api/open', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ command: cmd }) }); document.getElementById('openCommand').value = ''; setTimeout(refreshWindows, 1000); }

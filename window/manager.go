@@ -146,6 +146,32 @@ func FocusWindow(handle string) error {
 	return robotgo.ActivePid(pid)
 }
 
+// MaximizeWindow maximizes the window with the given handle
+func MaximizeWindow(handle string) error {
+	if runtime.GOOS == "windows" {
+		var hwnd uintptr
+		fmt.Sscanf(handle, "%v", &hwnd)
+		if hwnd != 0 {
+			win.ShowWindow(win.HWND(hwnd), win.SW_MAXIMIZE)
+			return nil
+		}
+	}
+	return nil
+}
+
+// MinimizeWindow minimizes the window with the given handle
+func MinimizeWindow(handle string) error {
+	if runtime.GOOS == "windows" {
+		var hwnd uintptr
+		fmt.Sscanf(handle, "%v", &hwnd)
+		if hwnd != 0 {
+			win.ShowWindow(win.HWND(hwnd), win.SW_MINIMIZE)
+			return nil
+		}
+	}
+	return nil
+}
+
 // TypeString focuses the window and types the given string
 func TypeString(handle string, text string) error {
 	if err := FocusWindow(handle); err != nil {
