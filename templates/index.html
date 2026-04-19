@@ -5,89 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atlas Window Controller</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root {
-            --bg-color: #e0e5ec;
-            --shadow-light: rgba(255, 255, 255, 0.8);
-            --shadow-dark: rgba(163, 177, 198, 0.6);
-            --accent-blue: #4f46e5;
-            --accent-red: #ef4444;
-            --accent-emerald: #10b981;
-            --accent-orange: #f59e0b;
-        }
-
         body {
-            background-color: var(--bg-color);
-            font-family: 'Inter', sans-serif;
-            color: #4a5568;
+            background-color: #09090b;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #fafafa;
             -webkit-tap-highlight-color: transparent;
         }
 
-        .nm-flat {
-            background: var(--bg-color);
-            box-shadow: 9px 9px 16px var(--shadow-dark), -9px -9px 16px var(--shadow-light);
-            border-radius: 20px;
+        .glass-card {
+            background: rgba(24, 24, 27, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(39, 39, 42, 1);
+            border-radius: 16px;
         }
 
-        .nm-inset {
-            background: var(--bg-color);
-            box-shadow: inset 6px 6px 10px var(--shadow-dark), inset -6px -6px 10px var(--shadow-light);
-            border-radius: 20px;
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .nm-btn {
-            background: var(--bg-color);
-            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
-            border-radius: 12px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .btn-primary:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
         }
 
-        .nm-btn:active {
-            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
-            transform: scale(0.98);
+        .btn-secondary {
+            background: rgba(39, 39, 42, 1);
+            border: 1px solid rgba(63, 63, 70, 1);
+            transition: all 0.2s;
         }
 
-        .nm-btn-danger { color: var(--accent-red); }
-        .nm-btn-primary { color: var(--accent-blue); }
-        .nm-btn-success { color: var(--accent-emerald); }
-        .nm-btn-warning { color: var(--accent-orange); }
+        .btn-secondary:active {
+            background: rgba(63, 63, 70, 1);
+            transform: scale(0.96);
+        }
+
+        .btn-danger {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            color: #ef4444;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:active {
+            background: rgba(220, 38, 38, 0.2);
+            transform: scale(0.96);
+        }
 
         input[type="range"] {
             -webkit-appearance: none;
-            width: 100%;
-            height: 8px;
-            background: var(--bg-color);
-            border-radius: 5px;
-            box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+            height: 6px;
+            background: #27272a;
+            border-radius: 10px;
             outline: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: var(--bg-color);
-            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            background: #fafafa;
             cursor: pointer;
-            border: 2px solid #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
-        .modal-blur {
-            backdrop-filter: blur(8px);
-            background-color: rgba(224, 229, 236, 0.7);
-        }
-
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: var(--shadow-dark); border-radius: 10px; }
-
-        .pulse {
-            width: 10px; height: 10px;
+        .status-pulse {
+            width: 8px;
+            height: 8px;
             background-color: #10b981;
             border-radius: 50%;
             box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
@@ -99,120 +88,166 @@
             70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+        }
+
+        .input-dark {
+            background: #18181b;
+            border: 1px solid #27272a;
+            color: #fafafa;
+            border-radius: 10px;
+        }
+
+        .input-dark:focus {
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
-    <div class="w-full max-w-4xl">
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="pulse"></div>
+<body class="min-h-screen p-4 md:p-10 flex flex-col items-center">
+    <div class="w-full max-w-5xl">
+        <header class="mb-10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-4">
+                <div class="p-3 glass-card bg-indigo-500/10 border-indigo-500/20">
+                    <i data-lucide="layout-dashboard" class="text-indigo-400 w-6 h-6"></i>
+                </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-700 tracking-tight">Atlas Controller</h1>
-                    <div class="flex flex-wrap gap-2 mt-1">
+                    <h1 class="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">Atlas Controller</h1>
+                    <div class="flex flex-wrap gap-2 mt-2">
                         {{range .IPs}}
-                        <span class="text-[10px] font-mono nm-inset px-2 py-0.5 text-gray-500">{{.}}:5000</span>
+                        <div class="flex items-center gap-2 px-2 py-1 rounded-full bg-zinc-900 border border-zinc-800">
+                            <div class="status-pulse"></div>
+                            <span class="text-[10px] font-mono text-zinc-400">{{.}}:5000</span>
+                        </div>
                         {{end}}
                     </div>
                 </div>
             </div>
-            <button onclick="shutdownPC()" class="nm-btn nm-btn-danger px-6 py-2 font-bold text-sm">
-                Shutdown System
+            <button onclick="shutdownPC()" class="btn-danger flex items-center gap-2 px-6 py-3 font-bold text-sm rounded-xl">
+                <i data-lucide="power" class="w-4 h-4"></i>
+                Shutdown
             </button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="space-y-8">
-                <section class="nm-flat p-6">
-                    <h2 class="text-lg font-bold text-gray-600 mb-6 uppercase tracking-wider text-sm">System Tuning</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Controls Column -->
+            <div class="lg:col-span-5 space-y-8">
+                <section class="glass-card p-6 border-zinc-800/50">
+                    <div class="flex items-center gap-2 mb-6">
+                        <i data-lucide="sliders" class="w-4 h-4 text-zinc-400"></i>
+                        <h2 class="text-sm font-bold text-zinc-400 uppercase tracking-widest">System Control</h2>
+                    </div>
                     <div class="space-y-8">
                         <div>
-                            <div class="flex justify-between mb-2 px-1">
-                                <span class="text-xs font-bold text-gray-500 uppercase">Volume</span>
-                                <span id="volumeVal" class="text-xs font-mono text-indigo-600 font-bold">50%</span>
+                            <div class="flex justify-between mb-4">
+                                <span class="text-xs font-semibold text-zinc-500">SYSTEM VOLUME</span>
+                                <span id="volumeVal" class="text-xs font-bold text-indigo-400">50%</span>
                             </div>
-                            <input type="range" min="0" max="100" value="50" oninput="document.getElementById('volumeVal').innerText = this.value + '%'" onchange="setVolume(this.value)">
+                            <input type="range" min="0" max="100" value="50" oninput="document.getElementById('volumeVal').innerText = this.value + '%'" onchange="setVolume(this.value)" class="w-full">
                         </div>
                         
                         <div>
-                            <span class="text-xs font-bold text-gray-500 uppercase block mb-3 px-1">Quick Launch</span>
+                            <span class="text-xs font-semibold text-zinc-500 block mb-4 uppercase">Launch Application</span>
                             <div class="flex gap-3">
-                                <input type="text" id="openCommand" placeholder="notepad, chrome..." class="nm-inset flex-grow bg-transparent px-4 py-2 text-sm focus:outline-none">
-                                <button onclick="openApp()" class="nm-btn nm-btn-primary w-12 h-10">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
-                                    </svg>
+                                <input type="text" id="openCommand" placeholder="Command (e.g. chrome)" class="input-dark flex-grow px-4 py-3 text-sm">
+                                <button onclick="openApp()" class="btn-primary p-3 rounded-xl">
+                                    <i data-lucide="play" class="w-5 h-5 fill-current"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section class="nm-flat p-6">
-                    <h2 class="text-lg font-bold text-gray-600 mb-6 uppercase tracking-wider text-sm">Universal Clipboard</h2>
+                <section class="glass-card p-6">
+                    <div class="flex items-center gap-2 mb-6">
+                        <i data-lucide="clipboard" class="w-4 h-4 text-zinc-400"></i>
+                        <h2 class="text-sm font-bold text-zinc-400 uppercase tracking-widest">Clipboard</h2>
+                    </div>
                     <div class="space-y-4">
-                        <textarea id="clipboardArea" rows="4" class="nm-inset w-full bg-transparent p-4 text-sm focus:outline-none resize-none custom-scroll" placeholder="Sync text with PC..."></textarea>
-                        <div class="flex gap-4">
-                            <button onclick="getClipboard()" class="nm-btn flex-grow py-3 text-xs font-bold text-indigo-600 uppercase tracking-widest">Pull From PC</button>
-                            <button onclick="setClipboard()" class="nm-btn flex-grow py-3 text-xs font-bold text-emerald-600 uppercase tracking-widest">Push To PC</button>
+                        <textarea id="clipboardArea" rows="4" class="input-dark w-full p-4 text-sm focus:outline-none resize-none custom-scroll" placeholder="Text to sync..."></textarea>
+                        <div class="flex gap-3">
+                            <button onclick="getClipboard()" class="btn-secondary flex-grow py-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2">
+                                <i data-lucide="download" class="w-3 h-3"></i> PULL
+                            </button>
+                            <button onclick="setClipboard()" class="btn-primary flex-grow py-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2">
+                                <i data-lucide="upload" class="w-3 h-3"></i> PUSH
+                            </button>
                         </div>
                     </div>
                 </section>
             </div>
 
-            <section class="nm-flat p-6 flex flex-col">
+            <!-- Windows Column -->
+            <section class="lg:col-span-7 glass-card p-6 flex flex-col">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-lg font-bold text-gray-600 uppercase tracking-wider text-sm">Active Windows</h2>
-                    <button onclick="refreshWindows()" class="nm-btn p-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="monitor" class="w-4 h-4 text-zinc-400"></i>
+                        <h2 class="text-sm font-bold text-zinc-400 uppercase tracking-widest">Active Windows</h2>
+                    </div>
+                    <button onclick="refreshWindows()" class="btn-secondary p-2 rounded-lg">
+                        <i data-lucide="refresh-cw" class="w-4 h-4 text-zinc-400"></i>
                     </button>
                 </div>
-                <div id="windowList" class="space-y-4 overflow-y-auto max-h-[600px] pr-2 custom-scroll pb-4">
-                    <p class="text-center py-8 text-gray-400 italic text-sm">Loading windows...</p>
+                <div id="windowList" class="space-y-4 overflow-y-auto max-h-[600px] pr-2 custom-scroll">
+                    <p class="text-center py-20 text-zinc-600 italic">Loading active windows...</p>
                 </div>
             </section>
         </div>
     </div>
 
-    <!-- Modals -->
-    <div id="screenshotModal" class="hidden fixed inset-0 modal-blur flex items-center justify-center p-4 z-50">
-        <div class="nm-flat w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="p-4 border-b border-gray-300 flex justify-between items-center">
-                <span id="modalTitle" class="font-bold text-gray-600 truncate mr-4">Preview</span>
-                <button onclick="closeScreenshotModal()" class="nm-btn nm-btn-danger w-8 h-8 font-bold">✕</button>
+    <!-- Screenshot Modal -->
+    <div id="screenshotModal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50">
+        <div class="glass-card w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div class="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+                <h3 id="modalTitle" class="font-bold text-zinc-200 truncate">Screenshot</h3>
+                <button onclick="closeScreenshotModal()" class="btn-secondary p-2 rounded-lg hover:text-red-500">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
-            <div class="overflow-auto p-4 bg-gray-100 flex-grow">
-                <img id="screenshotImg" src="" alt="Screenshot" class="max-w-full h-auto mx-auto rounded-lg shadow-lg">
+            <div class="overflow-auto p-4 bg-black/40">
+                <img id="screenshotImg" src="" alt="Screenshot" class="max-w-full h-auto mx-auto rounded-lg shadow-2xl border border-zinc-800">
             </div>
         </div>
     </div>
 
-    <div id="keyboardModal" class="hidden fixed inset-0 modal-blur flex items-center justify-center p-4 z-50">
-        <div class="nm-flat w-full max-w-md p-6 space-y-6">
+    <!-- Keyboard Modal -->
+    <div id="keyboardModal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50">
+        <div class="glass-card w-full max-w-md p-6 space-y-6 shadow-2xl">
             <div class="flex justify-between items-center">
-                <span id="keyboardModalTitle" class="font-bold text-gray-600 truncate">Keyboard Input</span>
-                <button onclick="closeKeyboardModal()" class="nm-btn nm-btn-danger w-8 h-8 font-bold">✕</button>
+                <h3 id="keyboardModalTitle" class="font-bold text-zinc-200 truncate uppercase tracking-wider text-sm">Keyboard Input</h3>
+                <button onclick="closeKeyboardModal()" class="btn-secondary p-2 rounded-lg hover:text-red-500">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
             </div>
             
             <div class="space-y-6">
-                <div class="flex gap-3">
-                    <input type="text" id="keyboardInput" class="nm-inset flex-grow bg-transparent px-4 py-3 text-sm focus:outline-none" placeholder="Enter text...">
-                    <button onclick="submitKeyboardText()" class="nm-btn nm-btn-primary px-4 font-bold text-sm">Send</button>
+                <div class="flex gap-2">
+                    <input type="text" id="keyboardInput" class="input-dark flex-grow px-4 py-3 text-sm" placeholder="Message...">
+                    <button onclick="submitKeyboardText()" class="btn-primary px-6 rounded-xl">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
                 </div>
                 
-                <div class="grid grid-cols-4 gap-4">
-                    <button onclick="sendKey('enter')" class="nm-btn py-3 text-xs font-bold text-emerald-600">ENTER</button>
-                    <button onclick="sendKey('backspace')" class="nm-btn py-3 text-xs font-bold text-rose-500">BACK</button>
-                    <button onclick="sendKey('tab')" class="nm-btn py-3 text-xs font-bold text-gray-500">TAB</button>
-                    <button onclick="sendKey('escape')" class="nm-btn py-3 text-xs font-bold text-gray-500">ESC</button>
-                    <button onclick="sendKey('up')" class="nm-btn py-3 font-bold text-gray-500">▲</button>
-                    <button onclick="sendKey('down')" class="nm-btn py-3 font-bold text-gray-500">▼</button>
-                    <button onclick="sendKey('left')" class="nm-btn py-3 font-bold text-gray-500">◀</button>
-                    <button onclick="sendKey('right')" class="nm-btn py-3 font-bold text-gray-500">▶</button>
-                    <button onclick="sendKey('space')" class="nm-btn py-3 text-xs font-bold text-gray-500 col-span-2">SPACE</button>
-                    <button onclick="sendKey('f5')" class="nm-btn py-3 text-xs font-bold text-indigo-500">F5</button>
-                    <button onclick="sendKey('win')" class="nm-btn py-3 text-xs font-bold text-indigo-500">WIN</button>
+                <div class="grid grid-cols-4 gap-3">
+                    <button onclick="sendKey('enter')" class="btn-secondary py-3 text-[10px] font-bold text-indigo-400">ENTER</button>
+                    <button onclick="sendKey('backspace')" class="btn-secondary py-3 text-[10px] font-bold">BS</button>
+                    <button onclick="sendKey('tab')" class="btn-secondary py-3 text-[10px] font-bold">TAB</button>
+                    <button onclick="sendKey('escape')" class="btn-secondary py-3 text-[10px] font-bold">ESC</button>
+                    <button onclick="sendKey('up')" class="btn-secondary py-3"><i data-lucide="chevron-up" class="w-4 h-4 mx-auto"></i></button>
+                    <button onclick="sendKey('down')" class="btn-secondary py-3"><i data-lucide="chevron-down" class="w-4 h-4 mx-auto"></i></button>
+                    <button onclick="sendKey('left')" class="btn-secondary py-3"><i data-lucide="chevron-left" class="w-4 h-4 mx-auto"></i></button>
+                    <button onclick="sendKey('right')" class="btn-secondary py-3"><i data-lucide="chevron-right" class="w-4 h-4 mx-auto"></i></button>
+                    <button onclick="sendKey('space')" class="btn-secondary py-3 text-[10px] font-bold col-span-2">SPACE</button>
+                    <button onclick="sendKey('f5')" class="btn-secondary py-3 text-[10px] font-bold">F5</button>
+                    <button onclick="sendKey('win')" class="btn-secondary py-3 text-[10px] font-bold"><i data-lucide="clover" class="w-4 h-4 mx-auto"></i></button>
                 </div>
             </div>
         </div>
@@ -228,7 +263,8 @@
                 const windows = await response.json();
                 
                 if (windows.length === 0) {
-                    list.innerHTML = '<p class="text-center py-8 text-gray-400 italic text-sm">No active windows found.</p>';
+                    list.innerHTML = '<div class="text-center py-20 text-zinc-600"><i data-lucide="monitor-off" class="w-12 h-12 mx-auto mb-4 opacity-20"></i><p class="text-sm">No active windows found</p></div>';
+                    lucide.createIcons();
                     return;
                 }
 
@@ -239,42 +275,43 @@
                 });
 
                 list.innerHTML = windows.map(win => `
-                    <div class="nm-flat p-4 group transition-all duration-300">
-                        <div class="flex flex-col gap-4">
-                            <div class="flex items-center justify-between gap-3">
+                    <div class="glass-card p-5 group hover:border-zinc-700 transition-all duration-300">
+                        <div class="flex flex-col gap-5">
+                            <div class="flex items-center justify-between gap-4">
                                 <div class="flex items-center min-w-0 flex-grow">
-                                    <div class="w-2 h-2 rounded-full mr-2 shrink-0 ${win.controllable ? 'bg-emerald-500' : 'bg-gray-300'}"></div>
-                                    <span class="font-bold text-gray-600 truncate text-xs uppercase tracking-tight" title="${win.title}">${win.title}</span>
+                                    <div class="w-2 h-2 rounded-full mr-3 shrink-0 ${win.controllable ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-zinc-700'}"></div>
+                                    <span class="font-bold text-zinc-100 truncate text-xs uppercase tracking-wide" title="${win.title}">${win.title}</span>
                                 </div>
-                                <button onclick="closeWindow('${win.handle}')" class="nm-btn w-8 h-8">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                <button onclick="closeWindow('${win.handle}')" class="text-zinc-600 hover:text-red-500 transition-colors">
+                                    <i data-lucide="x-circle" class="w-5 h-5"></i>
                                 </button>
                             </div>
                             
                             ${win.controllable ? `
-                            <div class="flex flex-col gap-3">
+                            <div class="flex flex-col gap-4">
                                 <div class="flex flex-wrap gap-2">
-                                    <button onclick="focusWindow('${win.handle}')" class="nm-btn px-4 py-2 text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Focus</button>
-                                    <button onclick="openKeyboardModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="nm-btn px-4 py-2 text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest">Input</button>
-                                    <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="nm-btn px-4 py-2 text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest">Snap</button>
-                                    <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="nm-btn px-4 py-2 text-[10px] font-extrabold text-orange-500 uppercase tracking-widest">Move</button>
+                                    <button onclick="focusWindow('${win.handle}')" class="btn-secondary px-4 py-2 text-[9px] font-black uppercase tracking-widest text-indigo-400">Focus</button>
+                                    <button onclick="openKeyboardModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn-secondary px-4 py-2 text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                                        <i data-lucide="keyboard" class="w-3 h-3"></i> Type
+                                    </button>
+                                    <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn-secondary px-4 py-2 text-[9px] font-black uppercase tracking-widest text-emerald-400">Snap</button>
+                                    <button onclick="snapWindow('${win.handle}', 'next-monitor')" class="btn-secondary px-4 py-2 text-[9px] font-black uppercase tracking-widest text-orange-400">Move</button>
                                 </div>
-                                <div class="nm-inset p-2 flex justify-between">
-                                    <button onclick="snapWindow('${win.handle}', 'top-left')" class="p-2 nm-btn w-9 h-9" title="Top Left">↖️</button>
-                                    <button onclick="snapWindow('${win.handle}', 'top-right')" class="p-2 nm-btn w-9 h-9" title="Top Right">↗️</button>
-                                    <button onclick="snapWindow('${win.handle}', 'bottom-left')" class="p-2 nm-btn w-9 h-9" title="Bottom Left">↙️</button>
-                                    <button onclick="snapWindow('${win.handle}', 'bottom-right')" class="p-2 nm-btn w-9 h-9" title="Bottom Right">↘️</button>
-                                    <button onclick="snapWindow('${win.handle}', 'full')" class="p-2 nm-btn w-9 h-9" title="Fullscreen">🔲</button>
+                                <div class="flex gap-2 p-1 bg-black/20 rounded-xl justify-center">
+                                    <button onclick="snapWindow('${win.handle}', 'top-left')" class="p-2 hover:text-white text-zinc-500" title="Top Left"><i data-lucide="arrow-up-left" class="w-4 h-4"></i></button>
+                                    <button onclick="snapWindow('${win.handle}', 'top-right')" class="p-2 hover:text-white text-zinc-500" title="Top Right"><i data-lucide="arrow-up-right" class="w-4 h-4"></i></button>
+                                    <button onclick="snapWindow('${win.handle}', 'bottom-left')" class="p-2 hover:text-white text-zinc-500" title="Bottom Left"><i data-lucide="arrow-down-left" class="w-4 h-4"></i></button>
+                                    <button onclick="snapWindow('${win.handle}', 'bottom-right')" class="p-2 hover:text-white text-zinc-500" title="Bottom Right"><i data-lucide="arrow-down-right" class="w-4 h-4"></i></button>
+                                    <button onclick="snapWindow('${win.handle}', 'full')" class="p-2 hover:text-white text-zinc-500" title="Fullscreen"><i data-lucide="maximize" class="w-4 h-4"></i></button>
                                 </div>
                             </div>
                             ` : ''}
                         </div>
                     </div>
                 `).join('');
+                lucide.createIcons();
             } catch (error) {
-                list.innerHTML = '<p class="text-red-400 text-center py-4">API connection failed.</p>';
+                list.innerHTML = '<div class="text-red-500/50 text-center py-10 text-xs font-bold uppercase tracking-widest">Connection Lost</div>';
             }
         }
 
@@ -282,6 +319,7 @@
             currentHandle = handle;
             document.getElementById('keyboardModalTitle').innerText = title;
             document.getElementById('keyboardModal').classList.remove('hidden');
+            lucide.createIcons();
         }
 
         function closeKeyboardModal() {
@@ -315,6 +353,7 @@
             document.getElementById('modalTitle').innerText = title;
             img.src = `/api/screenshot?handle=${handle}&t=${Date.now()}`;
             modal.classList.remove('hidden');
+            lucide.createIcons();
         }
 
         function closeScreenshotModal() {
@@ -350,9 +389,11 @@
         }
 
         async function getClipboard() {
-            const res = await fetch('/api/clipboard/get');
-            const data = await res.json();
-            document.getElementById('clipboardArea').value = data.text;
+            try {
+                const res = await fetch('/api/clipboard/get');
+                const data = await res.json();
+                document.getElementById('clipboardArea').value = data.text;
+            } catch (e) { console.error(e); }
         }
 
         async function setClipboard() {
@@ -390,6 +431,7 @@
         }
 
         refreshWindows();
+        lucide.createIcons();
         setInterval(refreshWindows, 15000);
     </script>
 </body>
