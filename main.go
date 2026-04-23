@@ -3,12 +3,14 @@ package main
 import (
 	"embed"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"html/template"
 	"io/fs"
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"atlas.pilot/window"
@@ -39,20 +41,38 @@ func getLocalIPs() []string {
 var Version = "dev" // Overwritten by gobake build
 
 func main() {
-	// Basic flag handling
-	if len(os.Args) > 1 {
-		if os.Args[1] == "-v" || os.Args[1] == "--version" {
-			fmt.Printf("atlas.pilot v%s\n", Version)
-			return
-		}
-		if os.Args[1] == "-h" || os.Args[1] == "--help" {
-			fmt.Println("Atlas Pilot - Premium remote PC controller")
-			fmt.Println("Usage: atlas.pilot [flags]")
-			fmt.Println("\nFlags:")
-			fmt.Println("  -v, --version  Show version")
-			fmt.Println("  -h, --help     Show help")
-			return
-		}
+	var (
+		port        int
+		showVersion bool
+		showHelp    bool
+	)
+	flag.IntVar(&port, "port", 5000, "Port to listen on")
+	flag.IntVar(&port, "p", 5000, "Port to listen on (shorthand)")
+	flag.BoolVar(&showVersion, "version", false, "Show version")
+	flag.BoolVar(&showVersion, "v", false, "Show version (shorthand)")
+	flag.BoolVar(&showHelp, "help", false, "Show help")
+	flag.BoolVar(&showHelp, "h", false, "Show help (shorthand)")
+	flag.Usage = func() {
+		fmt.Println("Atlas Pilot - Premium remote PC controller")
+		fmt.Println("Usage: atlas.pilot [flags]")
+		fmt.Println("\nFlags:")
+		fmt.Println("  -p, --port     Port to listen on (default 5000)")
+		fmt.Println("  -v, --version  Show version")
+		fmt.Println("  -h, --help     Show help")
+	}
+	flag.Parse()
+
+	if showVersion {
+		fmt.Printf("atlas.pilot v%s\n", Version)
+		return
+	}
+	if showHelp {
+		flag.Usage()
+		return
+	}
+	if port < 1 || port > 65535 {
+		fmt.Printf("Invalid port %d: must be between 1 and 65535\n", port)
+		os.Exit(1)
 	}
 
 	http.HandleFunc("/", handleIndex)
@@ -92,15 +112,15 @@ func main() {
 	// Serve static files from the sub-FS
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(templatesFS))))
 
-	port := "5000"
+	portStr := strconv.Itoa(port)
 	ips := getLocalIPs()
 	fmt.Printf("Atlas Pilot starting at:\n")
 	for _, ip := range ips {
-		fmt.Printf("  http://%s:%s\n", ip, port)
+		fmt.Printf("  http://%s:%s\n", ip, portStr)
 	}
 	fmt.Printf("\nControl this PC over WiFi using any of the URLs above.\n")
 
-	err = http.ListenAndServe(":"+port, nil)
+	err = http.ListenAndServe(":"+portStr, nil)
 	if err != nil {
 		fmt.Printf("Error starting server: %v\n", err)
 		os.Exit(1)
