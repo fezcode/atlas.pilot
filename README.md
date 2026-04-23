@@ -70,10 +70,20 @@ No internet required! As long as you're on the same Wi-Fi, you're the pilot.
 
 ## 🛠️ Build from Source
 
-Uses `gobake` for orchestration:
+Atlas Pilot is **pure Go** — no CGO, no C compiler, no native libraries required. All Windows interactions (input, clipboard, screenshot, window management) go through Win32 syscalls directly.
+
+Prerequisites:
+- Go 1.25+
+- `gobake` (install with `go install github.com/fezcode/gobake/cmd/gobake@latest`)
 
 ```powershell
 gobake build
+```
+
+The recipe builds with `CGO_ENABLED=0` by default. If a cached build starts behaving oddly (stale artifacts, phantom compile errors after a Go upgrade), run:
+
+```powershell
+atlas.hub --clear-go-cache
 ```
 
 ---

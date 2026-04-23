@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 
 	"atlas.pilot/window"
 )
@@ -60,7 +61,8 @@ func main() {
 	http.HandleFunc("/api/snap", handleSnapWindow)
 	http.HandleFunc("/api/open", handleOpenApp)
 	http.HandleFunc("/api/close", handleCloseWindow)
-	http.HandleFunc("/api/volume", handleSetVolume)
+	http.HandleFunc("/api/volume", handleVolume)
+	http.HandleFunc("/api/quit", handleQuitApp)
 	http.HandleFunc("/api/shutdown", handleShutdown)
 	http.HandleFunc("/api/restart", handleRestart)
 	http.HandleFunc("/api/sleep", handleSleep)
@@ -74,6 +76,8 @@ func main() {
 	http.HandleFunc("/api/paste", handlePaste)
 	http.HandleFunc("/api/maximize", handleMaximizeWindow)
 	http.HandleFunc("/api/minimize", handleMinimizeWindow)
+	http.HandleFunc("/api/raise", handleRaiseWindow)
+	http.HandleFunc("/api/lower", handleLowerWindow)
 	http.HandleFunc("/api/mouse/move", handleMouseMove)
 	http.HandleFunc("/api/mouse/click", handleMouseClick)
 	http.HandleFunc("/api/mouse/scroll", handleMouseScroll)
@@ -185,6 +189,44 @@ func handleMinimizeWindow(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func handleRaiseWindow(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		Handle string `json:"handle"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := window.RaiseWindow(req.Handle); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleLowerWindow(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		Handle string `json:"handle"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := window.LowerWindow(req.Handle); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func handleSnapWindow(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -243,23 +285,52 @@ func handleCloseWindow(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func handleSetVolume(w http.ResponseWriter, r *http.Request) {
+func handleVolume(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		level, err := window.GetSystemVolume()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(struct {
+			Level int `json:"level"`
+		}{Level: level})
+	case http.MethodPost:
+		var req struct {
+			Level int `json:"level"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if err := window.SetVolume(req.Level); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// handleQuitApp terminates the Atlas Pilot process itself.
+// The response is flushed before exiting so the client sees success.
+func handleQuitApp(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	var req struct {
-		Level int `json:"level"`
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(`{"ok":true}`))
+	if f, ok := w.(http.Flusher); ok {
+		f.Flush()
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if err := window.SetVolume(req.Level); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
+	go func() {
+		time.Sleep(250 * time.Millisecond)
+		os.Exit(0)
+	}()
 }
 
 func handleShutdown(w http.ResponseWriter, r *http.Request) {

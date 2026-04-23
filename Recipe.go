@@ -11,10 +11,10 @@ func Run(bake *gobake.Engine) error {
 		return err
 	}
 
-	bake.Task("build", "Builds the binary for Windows x64", func(ctx *gobake.Context) error {
+	bake.Task("build", "Builds the binary for Windows x64 (pure Go, no CGO required)", func(ctx *gobake.Context) error {
 		ctx.Log("Building %s v%s...", bake.Info.Name, bake.Info.Version)
 
-		// Restricted to Windows x64 as robotgo/win dependencies are platform-specific
+		// Windows x64 only: the window/input layer uses Win32 syscalls directly.
 		targets := []struct {
 			os   string
 			arch string
@@ -33,15 +33,14 @@ func Run(bake *gobake.Engine) error {
 			output := "build/" + bake.Info.Name + "-" + t.os + "-" + t.arch + ".exe"
 
 			ctx.Env = []string{
+				"CGO_ENABLED=0",
 				"GOOS=" + t.os,
 				"GOARCH=" + t.arch,
 			}
 
-			ctx.Log("Building target: %s/%s", t.os, t.arch)
-			err := ctx.Run("go", "build", "-ldflags", ldflags, "-o", output, ".")
-			if err != nil {
-				ctx.Log("Warning: Failed to build for %s/%s: %v", t.os, t.arch, err)
-				continue
+			ctx.Log("Building target: %s/%s (CGO_ENABLED=0)", t.os, t.arch)
+			if err := ctx.Run("go", "build", "-ldflags", ldflags, "-o", output, "."); err != nil {
+				return fmt.Errorf("failed to build for %s/%s: %w (if a cached build is causing issues, try `atlas.hub --clear-go-cache`)", t.os, t.arch, err)
 			}
 		}
 		return nil

@@ -2,526 +2,1793 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Atlas Pilot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0907">
+    <title>ATLAS PILOT · REMOTE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="/static/lucide.min.js"></script>
     <style>
         :root {
-            --font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            --bg-color: #09090b;
-            --card-bg: rgba(24, 24, 27, 0.8);
-            --border-color: #27272a;
-            --text-main: #fafafa;
-            --text-muted: #a1a1aa;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --danger: #ef4444;
-            --success: #10b981;
-            --warning: #f59e0b;
+            --bg: #0a0907;
+            --bg-panel: #12100c;
+            --bg-elev: #181510;
+            --bg-deep: #050403;
+
+            --ink: #e8e3d5;
+            --ink-dim: #8a8579;
+            --ink-faint: #4a463c;
+            --ink-strong: #f5f1e6;
+
+            --rule: #2d2820;
+            --rule-dim: #1a1712;
+
+            --amber: #ffab3d;
+            --amber-dim: #b8792c;
+            --amber-glow: rgba(255, 171, 61, 0.14);
+            --amber-glow-strong: rgba(255, 171, 61, 0.35);
+
+            --signal: #8fba54;
+            --warn: #ffc857;
+            --alert: #e0514a;
+            --alert-dim: #8c2a28;
+
+            --f-sans: 'Manrope', system-ui, -apple-system, sans-serif;
+            --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+            --corner: 14px;
         }
 
-        * { box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+
         body {
-            background-color: var(--bg-color);
-            font-family: var(--font-main);
-            color: var(--text-main);
-            margin: 0; padding: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--f-sans);
+            font-weight: 400;
+            line-height: 1.45;
+            min-height: 100vh;
+            min-height: 100dvh;
+            position: relative;
             -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            background-image:
+                radial-gradient(at 85% 0%, rgba(255, 171, 61, 0.09), transparent 55%),
+                radial-gradient(at 10% 35%, rgba(255, 171, 61, 0.04), transparent 40%);
+        }
+
+        /* Grain texture */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+            opacity: 0.4;
+            mix-blend-mode: overlay;
+            z-index: 1;
+        }
+        /* Scanlines */
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            pointer-events: none;
+            background: repeating-linear-gradient(180deg, transparent 0 2px, rgba(0,0,0,0.16) 2px 3px);
+            opacity: 0.07;
+            z-index: 2;
+        }
+
+        input, textarea, select { font-size: 16px; font-family: inherit; }
+
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 760px;
+            margin: 0 auto;
+            padding-left: max(1rem, env(safe-area-inset-left));
+            padding-right: max(1rem, env(safe-area-inset-right));
+            position: relative;
+            z-index: 10;
+        }
+        .app-root { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
+
+        /* ═══ STATUS BAR ═══ */
+        .status-bar {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            padding-top: max(0.85rem, env(safe-area-inset-top));
+            font-family: var(--f-mono);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            color: var(--ink-dim);
+            border-bottom: 1px solid var(--rule-dim);
+        }
+        .signal-cell {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            color: var(--amber);
+            font-weight: 600;
+        }
+        .signal-cell svg { width: 14px; height: 14px; }
+        .signal-cell.offline { color: var(--alert); }
+        .signal-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--amber);
+            box-shadow: 0 0 0 0 var(--amber-glow-strong);
+            animation: pulse-dot 2.2s infinite;
+            flex-shrink: 0;
+        }
+        .signal-dot.offline { background: var(--alert); animation: none; }
+        @keyframes pulse-dot {
+            0% { box-shadow: 0 0 0 0 var(--amber-glow-strong); }
+            70% { box-shadow: 0 0 0 7px transparent; }
+            100% { box-shadow: 0 0 0 0 transparent; }
+        }
+        .endpoint-cell {
+            display: flex; gap: 0.875rem; align-items: center;
+            overflow: hidden; min-width: 0;
+        }
+        .endpoint-cell span {
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .endpoint-sep { color: var(--ink-faint); }
+        .clock-cell {
+            color: var(--ink-strong);
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            padding: 2rem 0 1.75rem;
+            position: relative;
+            border-bottom: 1px solid var(--rule);
+            margin-bottom: 1.75rem;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            bottom: -1px; left: 0;
+            width: 88px; height: 2px;
+            background: var(--amber);
+            box-shadow: 0 0 14px var(--amber-glow-strong);
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1.25rem;
+            align-items: flex-end;
+        }
+        .wordmark {
+            font-family: var(--f-sans);
+            font-weight: 800;
+            font-size: clamp(3rem, 14vw, 4.75rem);
+            line-height: 0.88;
+            letter-spacing: -0.055em;
+            color: var(--ink-strong);
+            margin: 0;
+        }
+        .wordmark span {
+            display: block;
+            animation: word-reveal 640ms cubic-bezier(0.2, 0.85, 0.3, 1) both;
+        }
+        .wordmark span:last-child {
+            color: var(--amber);
+            text-shadow: 0 0 42px rgba(255, 171, 61, 0.28);
+            animation-delay: 140ms;
+        }
+        @keyframes word-reveal {
+            from { opacity: 0; transform: translateY(14px) scale(0.985); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .brand-meta {
+            font-family: var(--f-mono);
+            font-size: 10px;
+            letter-spacing: 0.22em;
+            text-align: right;
+            color: var(--ink-dim);
+            line-height: 1.75;
+            animation: fade-up 680ms cubic-bezier(0.2,0.85,0.3,1) both;
+            animation-delay: 240ms;
+        }
+        .brand-meta strong {
+            display: block;
+            color: var(--amber);
+            font-weight: 600;
+            font-size: 11px;
+            margin-bottom: 0.25rem;
+        }
+        .subtitle {
+            margin-top: 1rem;
+            font-family: var(--f-mono);
+            font-size: 11px;
+            letter-spacing: 0.26em;
+            color: var(--ink-dim);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: fade-up 680ms cubic-bezier(0.2,0.85,0.3,1) both;
+            animation-delay: 280ms;
+        }
+        .subtitle::before {
+            content: '';
+            width: 26px; height: 1px; background: var(--amber);
+            flex-shrink: 0;
+        }
+
+        /* ═══ HUD PANEL ═══ */
+        .hud-panel {
+            position: relative;
+            background: var(--bg-panel);
+            border: 1px solid var(--rule);
+            padding: 2rem 1.125rem 1.375rem;
+            margin: 1.5rem 0;
+            border-radius: 2px;
+        }
+        .hud-panel::before,
+        .hud-panel::after {
+            content: '';
+            position: absolute;
+            width: var(--corner); height: var(--corner);
+            pointer-events: none;
+        }
+        .hud-panel::before {
+            top: -1px; left: -1px;
+            border-top: 1.5px solid var(--amber);
+            border-left: 1.5px solid var(--amber);
+        }
+        .hud-panel::after {
+            bottom: -1px; right: -1px;
+            border-bottom: 1.5px solid var(--amber);
+            border-right: 1.5px solid var(--amber);
+        }
+        .hud-label {
+            position: absolute;
+            top: -0.55rem;
+            left: 1rem;
+            background: var(--bg);
+            padding: 0 0.65rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--amber);
+            font-family: var(--f-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+        }
+        .hud-label svg { width: 12px; height: 12px; }
+        .hud-action {
+            position: absolute;
+            top: -0.75rem;
+            right: 0.875rem;
+            background: var(--bg);
+            padding: 0 0.35rem;
+        }
+
+        .field-label {
+            font-family: var(--f-mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.22em;
+            color: var(--ink-dim);
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 1rem;
+            margin-bottom: 0.625rem;
+        }
+        .field-label .value {
+            color: var(--amber);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .input {
+            width: 100%;
+            background: var(--bg-deep);
+            border: 1px solid var(--rule);
+            color: var(--ink-strong);
+            font-family: var(--f-mono);
+            font-size: 16px;
+            padding: 0.75rem 0.875rem;
+            border-radius: 2px;
+            transition: border-color 120ms, box-shadow 120ms;
+        }
+        .input::placeholder { color: var(--ink-faint); }
+        .input:focus {
+            outline: none;
+            border-color: var(--amber);
+            box-shadow: 0 0 0 1px var(--amber-glow-strong);
+        }
+
+        input[type="range"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            height: 30px;
+            padding: 0;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 4px; border: none;
+            background: linear-gradient(to right,
+                var(--amber) 0%,
+                var(--amber) var(--val, 50%),
+                var(--rule) var(--val, 50%),
+                var(--rule) 100%);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            background: var(--amber);
+            border: 2px solid var(--bg-panel);
+            border-radius: 50%;
+            margin-top: -8px;
+            box-shadow: 0 0 14px var(--amber-glow-strong);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px; height: 18px;
+            background: var(--amber);
+            border: 2px solid var(--bg-panel);
+            border-radius: 50%;
+        }
+        input[type="range"]::-moz-range-track {
+            height: 4px; background: var(--rule);
+        }
+        input[type="range"][data-loading] { opacity: 0.35; pointer-events: none; }
+
+        /* Meter ticks */
+        .meter-ticks {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 8px;
+            margin-top: 2px;
+        }
+        .meter-ticks span {
+            width: 1px; height: 5px;
+            background: var(--ink-faint);
+        }
+        .meter-ticks span:nth-child(5n+1) { height: 8px; background: var(--ink-dim); }
+
+        /* ═══ BUTTONS ═══ */
+        .btn {
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: inherit;
+            font-family: var(--f-mono);
+            font-weight: 600;
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1rem;
+            min-height: 48px;
+            border-radius: 2px;
+            transition: transform 80ms, background 140ms, color 140ms, border-color 140ms, box-shadow 140ms;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            white-space: nowrap;
+        }
+        .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .btn:active { transform: scale(0.96); }
+
+        .btn.primary {
+            background: var(--amber);
+            color: var(--bg-deep);
+            font-weight: 700;
+            box-shadow: 0 8px 26px -10px var(--amber-glow-strong),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        }
+        .btn.primary:active {
+            background: var(--amber-dim);
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.28);
+        }
+
+        .btn.ghost {
+            background: transparent;
+            border: 1px solid var(--rule);
+            color: var(--ink);
+        }
+        @media (hover: hover) {
+            .btn.ghost:hover { border-color: var(--amber); color: var(--amber); }
+        }
+        .btn.ghost:active {
+            background: var(--amber-glow);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+
+        .btn.danger {
+            background: var(--bg-deep);
+            border: 1px solid var(--alert-dim);
+            color: var(--alert);
+            background-image: repeating-linear-gradient(
+                -45deg,
+                transparent 0 8px,
+                rgba(224, 81, 74, 0.06) 8px 16px
+            );
+        }
+        .btn.danger:active {
+            background: var(--alert);
+            color: var(--bg-deep);
+            border-color: var(--alert);
+            background-image: none;
+        }
+
+        .btn.signal {
+            background: transparent;
+            border: 1px solid var(--rule);
+            color: var(--signal);
+        }
+        .btn.signal:active {
+            background: var(--signal);
+            color: var(--bg-deep);
+            border-color: var(--signal);
+        }
+
+        .btn.icon {
+            padding: 0; min-width: 40px; min-height: 40px;
+            border: 1px solid var(--rule);
+            color: var(--ink-dim);
+        }
+        .btn.icon:active {
+            background: var(--amber-glow);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .btn.icon-sm { min-width: 32px; min-height: 32px; }
+
+        .btn.full { width: 100%; }
+
+        /* ═══ CONTROL STACK ═══ */
+        .control-stack { display: flex; flex-direction: column; gap: 1.5rem; }
+        .row { display: flex; gap: 0.5rem; align-items: center; }
+        .grow { flex: 1; min-width: 0; }
+
+        /* ═══ CLIPBOARD ═══ */
+        .clip-area {
+            width: 100%;
+            min-height: 110px;
+            background: var(--bg-deep);
+            border: 1px solid var(--rule);
+            color: var(--ink);
+            font-family: var(--f-mono);
+            font-size: 13px;
+            padding: 0.875rem;
+            resize: none;
+            border-radius: 2px;
             line-height: 1.5;
         }
-
-        .container { width: 100%; max-width: 1024px; margin: 0 auto; padding: 2rem 1rem; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .justify-center { justify-content: center; }
-        .gap-2 { gap: 0.5rem; }
-        .gap-3 { gap: 0.75rem; }
-        .gap-4 { gap: 1rem; }
-        .gap-5 { gap: 1.25rem; }
-        .gap-6 { gap: 1.5rem; }
-        .gap-8 { gap: 2rem; }
-        .grid { display: grid; }
-        .w-full { width: 100%; }
-        .grow { flex-grow: 1; }
-        .shrink-0 { flex-shrink: 0; }
-        .hidden { display: none !important; }
-        .p-4 { padding: 1rem; }
-        .p-5 { padding: 1.25rem; }
-        .p-6 { padding: 1.5rem; }
-        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-        .px-4 { padding-left: 1rem; padding-right: 1rem; }
-        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-        .mb-2 { margin-bottom: 0.5rem; }
-        .mb-4 { margin-bottom: 1rem; }
-        .mb-6 { margin-bottom: 1.5rem; }
-        .mb-8 { margin-bottom: 2rem; }
-        .mb-10 { margin-bottom: 2.5rem; }
-        .mt-1 { margin-top: 0.25rem; }
-        .mt-2 { margin-top: 0.5rem; }
-        .pt-4 { padding-top: 1rem; }
-        .rounded-lg { border-radius: 8px; }
-        .rounded-xl { border-radius: 12px; }
-        .rounded-full { border-radius: 9999px; }
-        .text-xs { font-size: 0.75rem; }
-        .text-sm { font-size: 0.875rem; }
-        .text-3xl { font-size: 1.875rem; }
-        .font-bold { font-weight: 700; }
-        .font-semibold { font-weight: 600; }
-        .font-mono { font-family: monospace; }
-        .uppercase { text-transform: uppercase; }
-        .tracking-widest { letter-spacing: 0.1em; }
-        .tracking-tight { letter-spacing: -0.025em; }
-        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        @media (min-width: 1024px) {
-            .lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-            .lg\:col-span-5 { grid-column: span 5 / span 5; }
-            .lg\:col-span-7 { grid-column: span 7 / span 7; }
-            .md\:flex-row { flex-direction: row; }
+        .clip-area::placeholder { color: var(--ink-faint); }
+        .clip-area:focus {
+            outline: none;
+            border-color: var(--amber);
+            box-shadow: 0 0 0 1px var(--amber-glow);
         }
 
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
+        /* ═══ WINDOW LIST ═══ */
+        .window-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.625rem;
+            margin-top: 0.125rem;
+        }
+        .target-card {
+            background: var(--bg-deep);
+            border: 1px solid var(--rule);
+            border-left: 2px solid var(--amber);
+            padding: 0.75rem 0.875rem 0.75rem 0.875rem;
+            transition: border-color 140ms;
+            position: relative;
+            animation: fade-up 420ms cubic-bezier(0.2,0.85,0.3,1) both;
+        }
+        .target-card[data-off] {
+            border-left-color: var(--ink-faint);
+            opacity: 0.75;
+        }
+        .target-head {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .target-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--ink-strong);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            min-width: 0;
+        }
+        .target-meta {
+            font-family: var(--f-mono);
+            font-size: 9px;
+            color: var(--ink-faint);
+            letter-spacing: 0.12em;
+            flex-shrink: 0;
+        }
+        .target-actions {
+            display: flex;
+            gap: 0.35rem;
+            flex-shrink: 0;
+        }
+        .target-actions .btn.icon { min-width: 34px; min-height: 34px; }
+        .target-tools {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.35rem;
         }
 
-        .btn {
-            cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center;
-            font-weight: 700; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 12px; padding: 0.5rem 1rem; text-decoration: none;
-            user-select: none;
+        .empty-state {
+            text-align: center;
+            padding: 2.75rem 1rem;
+            color: var(--ink-faint);
+            font-family: var(--f-mono);
+            font-size: 11px;
+            letter-spacing: 0.25em;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); color: white;
-        }
-        .btn-primary:active { transform: scale(0.96); box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2); }
-        .btn-secondary { background: #27272a; border: 1px solid #3f3f46; color: var(--text-main); }
-        .btn-secondary:active { background: #3f3f46; transform: scale(0.96); }
-        .btn-danger { background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.2); color: var(--danger); }
-        .btn-danger:active { background: rgba(220, 38, 38, 0.2); transform: scale(0.96); }
-
-        .input-dark {
-            background: #18181b; border: 1px solid var(--border-color); color: var(--text-main);
-            border-radius: 10px; width: 100%;
-        }
-        .input-dark:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
-
-        input[type="range"] { -webkit-appearance: none; height: 6px; background: #27272a; border-radius: 10px; outline: none; width: 100%; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #fafafa; cursor: pointer; }
-
-        .status-pulse {
-            width: 8px; height: 8px; background-color: var(--success); border-radius: 50%;
-            animation: pulse-green 2s infinite;
-        }
-        @keyframes pulse-green {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        .empty-state[data-scanning] { animation: scan-pulse 1.6s infinite; }
+        @keyframes scan-pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.95; }
         }
 
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        /* ═══ BOTTOM DOCK ═══ */
+        .dock {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            padding: 0.75rem max(1rem, env(safe-area-inset-left));
+            padding-right: max(1rem, env(safe-area-inset-right));
+            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.625rem;
+            background: linear-gradient(to top, var(--bg) 58%, rgba(10, 9, 7, 0));
+            z-index: 40;
+        }
+        .dock .btn {
+            min-height: 56px;
+            font-size: 12px;
+            letter-spacing: 0.2em;
+        }
 
+        /* ═══ MODALS ═══ */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
-            z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem;
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 4, 3, 0.82);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 50;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 180ms ease;
+        }
+        .modal-overlay:not(.hidden) {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal {
+            width: 100%;
+            max-width: 640px;
+            max-height: 92vh;
+            background: var(--bg-panel);
+            border: 1px solid var(--rule);
+            border-top: 1.5px solid var(--amber);
+            border-bottom: none;
+            border-radius: 2px 2px 0 0;
+            padding: 0.5rem 1rem calc(1rem + env(safe-area-inset-bottom));
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 240ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+        }
+        .modal-overlay:not(.hidden) .modal { transform: translateY(0); }
+        .modal-handle {
+            width: 38px; height: 3px;
+            background: var(--ink-faint);
+            border-radius: 2px;
+            margin: 0.3rem auto 0.875rem;
+        }
+        .modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.25rem 0 0.875rem;
+            border-bottom: 1px dashed var(--rule);
+            margin-bottom: 1rem;
+        }
+        .modal-title {
+            font-family: var(--f-mono);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.28em;
+            color: var(--amber);
+            text-transform: uppercase;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
         }
 
-        /* Mouse Specific */
-        #trackpad {
-            touch-action: none;
-            background: rgba(0,0,0,0.3);
-            border: 2px dashed var(--border-color);
-            border-radius: 12px;
-            height: 300px;
+        @media (min-width: 720px) {
+            .modal-overlay { align-items: center; padding: 1.25rem; }
+            .modal {
+                border-radius: 2px;
+                border: 1px solid var(--rule);
+                border-top: 1.5px solid var(--amber);
+            }
+            .modal-handle { display: none; }
+        }
+
+        .screenshot-modal { max-width: 1100px; max-height: 94vh; }
+        .screenshot-body {
+            background: var(--bg-deep);
+            padding: 0.5rem;
+            border: 1px solid var(--rule-dim);
+        }
+        .screenshot-body img {
+            display: block;
+            max-width: 100%;
+            max-height: 72vh;
+            margin: 0 auto;
+            height: auto;
+        }
+
+        /* ═══ SECTION LABEL (inside modals) ═══ */
+        .section-label {
+            font-family: var(--f-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.28em;
+            color: var(--ink-dim);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            margin: 1.125rem 0 0.625rem;
+        }
+        .section-label:first-child { margin-top: 0.25rem; }
+        .section-label::before {
+            content: '';
+            width: 10px; height: 1px;
+            background: var(--amber);
+            flex-shrink: 0;
+        }
+
+        /* ═══ KEY GRID ═══ */
+        .key-grid { display: grid; gap: 0.35rem; }
+        .key-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .key-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+        .key-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+        .key-grid.cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+        .key {
+            background: var(--bg-deep);
+            border: 1px solid var(--rule);
+            color: var(--ink);
+            font-family: var(--f-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            min-height: 46px;
+            padding: 0.4rem;
+            border-radius: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
+            cursor: pointer;
+            transition: transform 80ms, background 140ms, color 140ms, border-color 140ms;
             user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            gap: 0.35rem;
+            text-transform: uppercase;
+        }
+        .key svg { width: 14px; height: 14px; }
+        .key:active {
+            background: var(--amber);
+            color: var(--bg-deep);
+            border-color: var(--amber);
+            transform: scale(0.94);
+        }
+        .key.wide-2 { grid-column: span 2; }
+        .key.accent { color: var(--amber); border-color: rgba(255, 171, 61, 0.3); }
+        .key.danger { color: var(--alert); border-color: rgba(224, 81, 74, 0.3); }
+        .key.danger:active { background: var(--alert); color: var(--bg-deep); border-color: var(--alert); }
+        .key.tall { min-height: 64px; font-size: 11px; }
+
+        /* ═══ TRACKPAD ═══ */
+        #trackpad {
+            position: relative;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            background:
+                radial-gradient(circle at var(--px, 50%) var(--py, 50%), var(--amber-glow-strong), transparent 28%),
+                repeating-linear-gradient(0deg, transparent 0 19.9%, var(--rule-dim) 19.9% 20%),
+                repeating-linear-gradient(90deg, transparent 0 19.9%, var(--rule-dim) 19.9% 20%),
+                var(--bg-deep);
+            border: 1px dashed var(--rule);
+            border-radius: 2px;
+            height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink-faint);
+            font-family: var(--f-mono);
+            font-size: 10px;
+            letter-spacing: 0.35em;
+            overflow: hidden;
+            margin-bottom: 0.875rem;
+        }
+        #trackpad::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 80px; height: 1px;
+            background: var(--rule);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        #trackpad::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 1px; height: 80px;
+            background: var(--rule);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        #trackpad .hint {
+            z-index: 1;
+            opacity: 0.5;
+            animation: gentle-pulse 3.5s infinite;
+            text-shadow: 0 0 12px var(--bg-deep);
+        }
+        @keyframes gentle-pulse {
+            0%, 100% { opacity: 0.35; }
+            50% { opacity: 0.7; }
+        }
+        .trackpad-crosshair {
+            position: absolute;
+            pointer-events: none;
+            color: var(--amber);
+            font-size: 28px;
+            line-height: 1;
+            font-family: var(--f-mono);
+            transform: translate(-50%, -55%);
+            opacity: 0;
+            transition: opacity 140ms;
+        }
+        .trackpad-crosshair.active { opacity: 1; }
+
+        /* ═══ SYSTEM MODAL ═══ */
+        .system-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.625rem;
+        }
+        .sys-btn {
+            background: var(--bg-deep);
+            border: 1px solid var(--rule);
+            padding: 1.5rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.65rem;
+            cursor: pointer;
+            transition: transform 80ms, background 140ms, color 140ms, border-color 140ms;
+            border-radius: 2px;
+            color: var(--ink);
+            font-family: var(--f-mono);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            min-height: 130px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .sys-btn svg { width: 28px; height: 28px; }
+        .sys-btn:active { transform: scale(0.96); }
+        .sys-btn.shutdown { border-color: rgba(224, 81, 74, 0.3); color: var(--alert); }
+        .sys-btn.shutdown:active { background: var(--alert); color: var(--bg-deep); border-color: var(--alert); }
+        .sys-btn.restart { color: var(--warn); border-color: rgba(255, 200, 87, 0.25); }
+        .sys-btn.restart:active { background: var(--warn); color: var(--bg-deep); border-color: var(--warn); }
+        .sys-btn.sleep { color: #a5b8d8; border-color: rgba(165, 184, 216, 0.22); }
+        .sys-btn.sleep:active { background: #a5b8d8; color: var(--bg-deep); border-color: #a5b8d8; }
+        .sys-btn.lock { color: var(--ink); }
+        .sys-btn.lock:active { background: var(--amber); color: var(--bg-deep); border-color: var(--amber); }
+        .sys-btn.quit-atlas {
+            color: var(--amber);
+            border-color: rgba(255, 171, 61, 0.3);
+            background-image: repeating-linear-gradient(
+                -45deg, transparent 0 10px,
+                rgba(255, 171, 61, 0.04) 10px 20px
+            );
+        }
+        .sys-btn.quit-atlas:active {
+            background: var(--amber); color: var(--bg-deep); border-color: var(--amber);
+            background-image: none;
+        }
+
+        #confirmOverlay {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-deep);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 1.75rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
+            gap: 1.5rem;
+            border-top: 3px solid var(--alert);
+            background-image: repeating-linear-gradient(
+                -45deg,
+                transparent 0 14px,
+                rgba(224, 81, 74, 0.05) 14px 28px
+            );
+            z-index: 10;
+            animation: fade-in 180ms ease both;
+        }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        #confirmOverlay.hidden { display: none !important; }
+        .caution-tag {
+            position: absolute;
+            top: 0.9rem; left: 1.25rem;
+            font-family: var(--f-mono);
+            font-size: 10px;
+            color: var(--alert);
+            font-weight: 700;
+            letter-spacing: 0.4em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .caution-tag svg { width: 12px; height: 12px; }
+        .confirm-title {
+            text-align: center;
+            font-family: var(--f-sans);
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            color: var(--ink-strong);
+            line-height: 1.1;
+        }
+        .confirm-text {
+            text-align: center;
+            font-family: var(--f-mono);
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            color: var(--ink-dim);
+            text-transform: uppercase;
+        }
+        .confirm-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.625rem;
+        }
+
+        /* ═══ TOASTS ═══ */
+        .toast-stack {
+            position: fixed;
+            bottom: calc(96px + env(safe-area-inset-bottom));
+            left: 1rem; right: 1rem;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 0.5rem;
+            z-index: 60;
+            pointer-events: none;
+        }
+        @media (min-width: 720px) {
+            .toast-stack {
+                bottom: calc(88px + env(safe-area-inset-bottom));
+                left: auto;
+                right: 1.25rem;
+                max-width: 380px;
+            }
+        }
+        .toast {
+            pointer-events: auto;
+            background: var(--bg-panel);
+            border: 1px solid var(--rule);
+            border-left: 3px solid var(--alert);
+            padding: 0.75rem 0.875rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            border-radius: 2px;
+            box-shadow: 0 14px 40px -14px rgba(0, 0, 0, 0.6);
+            animation: toast-in 220ms cubic-bezier(0.2, 0.85, 0.3, 1.1) both;
+            cursor: pointer;
+            font-family: var(--f-mono);
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            color: var(--ink);
+        }
+        .toast.out { animation: toast-out 160ms ease forwards; }
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes toast-out {
+            to { opacity: 0; transform: translateY(10px); }
+        }
+        .toast svg.toast-icon {
+            width: 16px; height: 16px;
+            margin-top: 1px;
+            flex-shrink: 0;
+            color: var(--alert);
+        }
+        .toast-body { flex: 1; min-width: 0; }
+        .toast-title {
+            font-weight: 700;
+            font-size: 10px;
+            color: var(--alert);
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+        .toast-msg {
+            color: var(--ink-dim);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .toast.warn { border-left-color: var(--warn); }
+        .toast.warn svg.toast-icon, .toast.warn .toast-title { color: var(--warn); }
+        .toast.info { border-left-color: var(--amber); }
+        .toast.info svg.toast-icon, .toast.info .toast-title { color: var(--amber); }
+
+        /* ═══ UTILITIES ═══ */
+        .hidden { display: none !important; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stagger > * {
+            opacity: 0;
+            animation: fade-up 540ms cubic-bezier(0.2, 0.85, 0.3, 1) both;
+        }
+        .stagger > *:nth-child(1) { animation-delay: 80ms; }
+        .stagger > *:nth-child(2) { animation-delay: 180ms; }
+        .stagger > *:nth-child(3) { animation-delay: 280ms; }
+        .stagger > *:nth-child(4) { animation-delay: 380ms; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="mb-10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="flex items-center gap-4">
-                <div class="p-3 glass-card" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2);">
-                    <i data-lucide="send" style="color: #818cf8; width: 24px; height: 24px;"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold tracking-tight">Atlas Pilot</h1>
-                    <div class="flex gap-2 mt-2" style="flex-wrap: wrap;">
-                        {{range .IPs}}
-                        <div class="flex items-center gap-2 px-2 py-1 rounded-full" style="background: #18181b; border: 1px solid #27272a;">
-                            <div class="status-pulse"></div>
-                            <span class="text-xs font-mono" style="color: var(--text-muted);">{{.}}:5000</span>
-                        </div>
-                        {{end}}
-                    </div>
-                </div>
+    <div class="container app-root">
+        <header class="status-bar">
+            <div id="signalCell" class="signal-cell">
+                <span class="signal-dot" id="signalDot"></span>
+                <i data-lucide="wifi"></i>
+                <span id="signalType">ONLINE</span>
             </div>
-            <div class="flex gap-3">
-                <button onclick="openMouseModal()" class="btn btn-secondary px-6 py-3 rounded-xl font-bold text-sm">
-                    <i data-lucide="mouse-pointer-2" style="width: 16px; height: 16px; margin-right: 8px;"></i> Mouse
-                </button>
-                <button onclick="openSystemModal()" class="btn btn-danger px-6 py-3 rounded-xl font-bold text-sm">
-                    <i data-lucide="power" style="width: 16px; height: 16px; margin-right: 8px;"></i> System
-                </button>
+            <div class="endpoint-cell" id="endpoints">
+                {{range $i, $ip := .IPs}}{{if $i}}<span class="endpoint-sep">·</span>{{end}}<span>{{$ip}}:5000</span>{{end}}
             </div>
+            <div class="clock-cell" id="clock">--:--:--</div>
         </header>
 
-        <div class="grid lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-5 flex flex-col gap-8">
-                <section class="glass-card p-6">
-                    <div class="flex items-center gap-2 mb-6">
-                        <i data-lucide="sliders" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
-                        <h2 class="text-sm font-bold uppercase tracking-widest" style="color: var(--text-muted);">System Control</h2>
-                    </div>
-                    <div class="flex flex-col gap-8">
-                        <div>
-                            <div class="flex justify-between mb-4">
-                                <span class="text-xs font-semibold" style="color: #71717a;">VOLUME</span>
-                                <span id="volumeVal" class="text-xs font-bold" style="color: var(--primary);">50%</span>
-                            </div>
-                            <input type="range" min="0" max="100" value="50" oninput="document.getElementById('volumeVal').innerText = this.value + '%'" onchange="setVolume(this.value)">
-                        </div>
-                        <div>
-                            <span class="text-xs font-semibold block mb-4 uppercase" style="color: #71717a;">Launch App</span>
-                            <div class="flex gap-3">
-                                <input type="text" id="openCommand" placeholder="Command..." class="input-dark px-4 py-3 text-sm">
-                                <button onclick="openApp()" class="btn btn-primary rounded-xl" style="padding: 0.75rem;"><i data-lucide="play" style="width: 20px; height: 20px;"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="glass-card p-6">
-                    <div class="flex items-center gap-2 mb-6">
-                        <i data-lucide="clipboard" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
-                        <h2 class="text-sm font-bold uppercase tracking-widest" style="color: var(--text-muted);">Clipboard</h2>
-                    </div>
-                    <div class="flex flex-col gap-4">
-                        <textarea id="clipboardArea" rows="4" class="input-dark p-4 text-sm focus:outline-none resize-none custom-scroll" placeholder="Text to sync..."></textarea>
-                        <div class="flex gap-3">
-                            <button onclick="getClipboard()" class="btn btn-secondary grow py-3 text-xs font-bold rounded-xl gap-2"><i data-lucide="download" style="width: 12px; height: 12px;"></i> PULL</button>
-                            <button onclick="setClipboard()" class="btn btn-primary grow py-3 text-xs font-bold rounded-xl gap-2"><i data-lucide="upload" style="width: 12px; height: 12px;"></i> PUSH</button>
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-            <section class="lg:col-span-7 glass-card p-6 flex flex-col">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="monitor" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
-                        <h2 class="text-sm font-bold uppercase tracking-widest" style="color: var(--text-muted);">Active Windows</h2>
-                    </div>
-                    <button onclick="refreshWindows()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i></button>
+        <section class="hero">
+            <div class="hero-grid">
+                <div>
+                    <h1 class="wordmark">
+                        <span>ATLAS</span>
+                        <span>PILOT</span>
+                    </h1>
+                    <div class="subtitle">REMOTE · FLIGHT · CONTROL</div>
                 </div>
-                <div id="windowList" class="flex flex-col gap-4 overflow-y-auto custom-scroll" style="max-height: 600px; padding-right: 0.5rem;">
-                    <p class="text-center py-20 text-sm italic" style="color: #52525b;">Loading active windows...</p>
+                <div class="brand-meta">
+                    <strong>v0.5.4</strong>
+                    BUILD · STABLE<br>
+                    CHANNEL · LAN
+                </div>
+            </div>
+        </section>
+
+        <div class="stagger">
+            <section class="hud-panel">
+                <div class="hud-label">
+                    <i data-lucide="sliders-horizontal"></i>
+                    <span>SYSTEM · CONTROL</span>
+                </div>
+                <div class="control-stack">
+                    <div>
+                        <div class="field-label">
+                            <span>Volume</span>
+                            <span id="volumeVal" class="value">--</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="0" id="volumeSlider"
+                               data-loading
+                               oninput="onVolumeInput(this)" onchange="setVolume(this.value)">
+                        <div class="meter-ticks">
+                            <span></span><span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span><span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="field-label">
+                            <span>Launch · App</span>
+                            <span class="value">CMD →</span>
+                        </div>
+                        <div class="row">
+                            <input id="openCommand" class="input grow" type="text" placeholder="e.g. notepad.exe">
+                            <button onclick="openApp()" class="btn primary" style="min-width:56px;padding:0.85rem 1rem;">
+                                <i data-lucide="play"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="hud-panel">
+                <div class="hud-label">
+                    <i data-lucide="clipboard-list"></i>
+                    <span>CLIPBOARD · SYNC</span>
+                </div>
+                <textarea id="clipboardArea" class="clip-area" rows="4"
+                          placeholder="Shared buffer between this device and the host…"></textarea>
+                <div class="row" style="margin-top:0.625rem;gap:0.5rem;">
+                    <button onclick="getClipboard()" class="btn ghost grow">
+                        <i data-lucide="download"></i>PULL
+                    </button>
+                    <button onclick="setClipboard()" class="btn primary grow">
+                        <i data-lucide="upload"></i>PUSH
+                    </button>
+                </div>
+            </section>
+
+            <section class="hud-panel">
+                <div class="hud-label">
+                    <i data-lucide="layers"></i>
+                    <span>ACTIVE · WINDOWS</span>
+                </div>
+                <div class="hud-action">
+                    <button onclick="refreshWindows()" class="btn icon icon-sm" aria-label="Refresh">
+                        <i data-lucide="refresh-cw"></i>
+                    </button>
+                </div>
+                <div id="windowList" class="window-list">
+                    <div class="empty-state" data-scanning>SCANNING…</div>
                 </div>
             </section>
         </div>
     </div>
 
-    <!-- Modals -->
-    <div id="screenshotModal" class="hidden modal-overlay">
-        <div class="glass-card w-full flex flex-col" style="max-width: 1024px; max-height: 90vh; overflow: hidden;">
-            <div class="p-4 flex justify-between items-center bg-zinc-900/50" style="border-bottom: 1px solid var(--border-color);">
-                <h3 id="modalTitle" class="font-bold" style="color: #e4e4e7; margin: 0;">Screenshot</h3>
-                <button onclick="closeScreenshotModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 20px; height: 20px;"></i></button>
+    <nav class="dock">
+        <button onclick="openMouseModal()" class="btn ghost">
+            <i data-lucide="mouse-pointer-2"></i>MOUSE
+        </button>
+        <button onclick="openSystemModal()" class="btn danger">
+            <i data-lucide="power"></i>SYSTEM
+        </button>
+    </nav>
+
+    <!-- Screenshot modal -->
+    <div id="screenshotModal" class="modal-overlay hidden" onclick="if(event.target===this)closeScreenshotModal()">
+        <div class="modal screenshot-modal">
+            <div class="modal-handle"></div>
+            <div class="modal-head">
+                <div class="modal-title" id="modalTitle">SCREENSHOT</div>
+                <button onclick="closeScreenshotModal()" class="btn icon"><i data-lucide="x"></i></button>
             </div>
-            <div class="grow overflow-auto p-4" style="background: rgba(0,0,0,0.4);">
-                <img id="screenshotImg" src="" alt="Screenshot" class="w-full" style="height: auto; border-radius: 8px;">
+            <div class="screenshot-body">
+                <img id="screenshotImg" src="" alt="Screenshot">
             </div>
         </div>
     </div>
 
-    <div id="keyboardModal" class="hidden modal-overlay">
-        <div class="glass-card w-full p-6 flex flex-col gap-6" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
-            <div class="flex justify-between items-center">
-                <h3 id="keyboardModalTitle" class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Keyboard</h3>
-                <button onclick="closeKeyboardModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
+    <!-- Keyboard modal -->
+    <div id="keyboardModal" class="modal-overlay hidden" onclick="if(event.target===this)closeKeyboardModal()">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <div class="modal-head">
+                <div class="modal-title" id="keyboardModalTitle">KEYBOARD</div>
+                <button onclick="closeKeyboardModal()" class="btn icon"><i data-lucide="x"></i></button>
             </div>
-            <div class="flex flex-col gap-6">
-                <div class="flex gap-2">
-                    <input type="text" id="keyboardInput" class="input-dark px-4 py-3 text-sm" placeholder="Type text...">
-                    <button onclick="submitKeyboardText()" class="btn btn-primary px-6 rounded-xl"><i data-lucide="send" style="width: 16px; height: 16px;"></i></button>
-                </div>
-                <div class="flex flex-col gap-3">
-                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Navigation & Basic</span>
-                    <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
-                        <button onclick="sendKey('enter')" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--primary);">ENTER</button>
-                        <button onclick="sendKey('backspace')" class="btn btn-secondary py-3 text-xs font-bold">BS</button>
-                        <button onclick="sendKey('tab')" class="btn btn-secondary py-3 text-xs font-bold">TAB</button>
-                        <button onclick="sendKey('escape')" class="btn btn-secondary py-3 text-xs font-bold">ESC</button>
-                        <button onclick="sendKey('up')" class="btn btn-secondary py-3"><i data-lucide="chevron-up" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
-                        <button onclick="sendKey('down')" class="btn btn-secondary py-3"><i data-lucide="chevron-down" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
-                        <button onclick="sendKey('left')" class="btn btn-secondary py-3"><i data-lucide="chevron-left" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
-                        <button onclick="sendKey('right')" class="btn btn-secondary py-3"><i data-lucide="chevron-right" style="width: 16px; height: 16px; margin: 0 auto;"></i></button>
-                        <button onclick="sendKey('space')" class="btn btn-secondary py-3 text-xs font-bold" style="grid-column: span 2;">SPACE</button>
-                        <button onclick="pasteIntoWindow()" class="btn btn-primary py-3 text-xs font-bold gap-2" style="grid-column: span 2;"><i data-lucide="clipboard-paste" style="width: 12px; height: 12px;"></i> PASTE</button>
-                    </div>
-                </div>
-                <div class="flex flex-col gap-3">
-                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Shortcuts</span>
-                    <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
-                        <button onclick="sendHotkey('c', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+C</button>
-                        <button onclick="sendHotkey('v', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+V</button>
-                        <button onclick="sendHotkey('x', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+X</button>
-                        <button onclick="sendHotkey('z', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+Z</button>
-                        <button onclick="sendHotkey('a', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+A</button>
-                        <button onclick="sendHotkey('s', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+S</button>
-                        <button onclick="sendHotkey('f', ['control'])" class="btn btn-secondary py-2 text-[10px] font-bold">CTRL+F</button>
-                        <button onclick="sendHotkey('f4', ['alt'])" class="btn btn-danger py-2 text-[10px] font-bold">ALT+F4</button>
-                    </div>
-                </div>
-                <div class="flex flex-col gap-3">
-                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Function Keys</span>
-                    <div class="grid" style="grid-template-columns: repeat(6, 1fr); gap: 0.4rem;">
-                        <button onclick="sendKey('f1')" class="btn btn-secondary py-2 text-[10px] font-bold">F1</button>
-                        <button onclick="sendKey('f2')" class="btn btn-secondary py-2 text-[10px] font-bold">F2</button>
-                        <button onclick="sendKey('f3')" class="btn btn-secondary py-2 text-[10px] font-bold">F3</button>
-                        <button onclick="sendKey('f4')" class="btn btn-secondary py-2 text-[10px] font-bold">F4</button>
-                        <button onclick="sendKey('f5')" class="btn btn-secondary py-2 text-[10px] font-bold">F5</button>
-                        <button onclick="sendKey('f6')" class="btn btn-secondary py-2 text-[10px] font-bold">F6</button>
-                        <button onclick="sendKey('f7')" class="btn btn-secondary py-2 text-[10px] font-bold">F7</button>
-                        <button onclick="sendKey('f8')" class="btn btn-secondary py-2 text-[10px] font-bold">F8</button>
-                        <button onclick="sendKey('f9')" class="btn btn-secondary py-2 text-[10px] font-bold">F9</button>
-                        <button onclick="sendKey('f10')" class="btn btn-secondary py-2 text-[10px] font-bold">F10</button>
-                        <button onclick="sendKey('f11')" class="btn btn-secondary py-2 text-[10px] font-bold">F11</button>
-                        <button onclick="sendKey('f12')" class="btn btn-secondary py-2 text-[10px] font-bold">F12</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Window Management Modal -->
-    <div id="manageModal" class="hidden modal-overlay">
-        <div class="glass-card w-full p-6 flex flex-col gap-6" style="max-width: 448px;">
-            <div class="flex justify-between items-center">
-                <h3 id="manageModalTitle" class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Manage Window</h3>
-                <button onclick="closeManageModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
-            </div>
-            <div class="flex flex-col gap-6">
-                <div class="flex flex-col gap-3">
-                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Visibility & State</span>
-                    <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-                        <button onclick="focusWindow(currentHandle)" class="btn btn-secondary py-3 text-xs font-bold" style="color: #818cf8;">Focus</button>
-                        <button onclick="maximizeWindow(currentHandle)" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--success);">Maximize</button>
-                        <button onclick="minimizeWindow(currentHandle)" class="btn btn-secondary py-3 text-xs font-bold" style="color: var(--warning);">Minimize</button>
-                    </div>
-                </div>
-                <div class="flex flex-col gap-3">
-                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Layout & Display</span>
-                    <div class="flex flex-col gap-2">
-                        <button onclick="snapWindow(currentHandle, 'next-monitor')" class="btn btn-primary py-3 text-xs font-bold gap-2"><i data-lucide="monitor-forward" style="width: 16px; height: 16px;"></i> MOVE TO OTHER MONITOR</button>
-                        <div class="grid" style="grid-template-columns: repeat(5, 1fr); gap: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 12px;">
-                            <button onclick="snapWindow(currentHandle, 'top-left')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-up-left" style="width: 18px; height: 18px; color: #71717a;"></i></button>
-                            <button onclick="snapWindow(currentHandle, 'top-right')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-up-right" style="width: 18px; height: 18px; color: #71717a;"></i></button>
-                            <button onclick="snapWindow(currentHandle, 'bottom-left')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-down-left" style="width: 18px; height: 18px; color: #71717a;"></i></button>
-                            <button onclick="snapWindow(currentHandle, 'bottom-right')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="arrow-down-right" style="width: 18px; height: 18px; color: #71717a;"></i></button>
-                            <button onclick="snapWindow(currentHandle, 'full')" class="btn" style="background:none;padding:0.5rem;"><i data-lucide="maximize" style="width: 18px; height: 18px; color: #71717a;"></i></button>
-                        </div>
-                    </div>
-                </div>
-                <div class="pt-4 border-t border-zinc-800">
-                    <button onclick="closeWindow(currentHandle); closeManageModal();" class="btn btn-danger w-full py-3 text-xs font-bold gap-2"><i data-lucide="x-circle" style="width: 14px; height: 14px;"></i> TERMINATE PROCESS</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mouse Control Modal -->
-    <div id="mouseModal" class="hidden modal-overlay">
-        <div class="glass-card w-full p-6 flex flex-col gap-6" style="max-width: 448px;">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">Mouse Control</h3>
-                <button onclick="closeMouseModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
-            </div>
-            <div class="flex flex-col gap-4">
-                <div id="trackpad" class="input-dark">SWIPE TO MOVE CURSOR</div>
-                <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
-                    <button onclick="mouseClick('left')" class="btn btn-secondary py-6 text-xs font-bold">LEFT</button>
-                    <button onclick="mouseClick('center')" class="btn btn-secondary py-6 text-xs font-bold">MID</button>
-                    <button onclick="mouseClick('right')" class="btn btn-secondary py-6 text-xs font-bold">RIGHT</button>
-                </div>
-                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                    <button onclick="mouseScroll(0, 5)" class="btn btn-secondary py-4 text-xs font-bold gap-2"><i data-lucide="chevron-up"></i> SCROLL UP</button>
-                    <button onclick="mouseScroll(0, -5)" class="btn btn-secondary py-4 text-xs font-bold gap-2"><i data-lucide="chevron-down"></i> SCROLL DOWN</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- System Modal -->
-    <div id="systemModal" class="hidden modal-overlay">
-        <div class="glass-card w-full p-6 flex flex-col gap-6 relative overflow-hidden" style="max-width: 448px;">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-sm uppercase tracking-widest" style="color: #e4e4e7; margin: 0;">OS Control</h3>
-                <button onclick="closeSystemModal()" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 8px;"><i data-lucide="x" style="width: 16px; height: 16px;"></i></button>
-            </div>
-            
-            <div id="systemGrid" class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <button onclick="requestAction('shutdown')" class="btn btn-danger py-8 flex flex-col gap-3">
-                    <i data-lucide="power" style="width: 32px; height: 32px;"></i>
-                    <span class="text-xs font-bold uppercase">Shutdown</span>
-                </button>
-                <button onclick="requestAction('restart')" class="btn btn-secondary py-8 flex flex-col gap-3" style="color: var(--warning); border-color: rgba(245, 158, 11, 0.2);">
-                    <i data-lucide="refresh-cw" style="width: 32px; height: 32px;"></i>
-                    <span class="text-xs font-bold uppercase">Restart</span>
-                </button>
-                <button onclick="requestAction('sleep')" class="btn btn-secondary py-8 flex flex-col gap-3" style="color: #818cf8; border-color: rgba(129, 140, 248, 0.2);">
-                    <i data-lucide="moon" style="width: 32px; height: 32px;"></i>
-                    <span class="text-xs font-bold uppercase">Sleep</span>
-                </button>
-                <button onclick="requestAction('lock')" class="btn btn-secondary py-8 flex flex-col gap-3">
-                    <i data-lucide="lock" style="width: 32px; height: 32px;"></i>
-                    <span class="text-xs font-bold uppercase">Lock PC</span>
+            <div class="row" style="gap:0.5rem;">
+                <input id="keyboardInput" class="input grow" type="text" placeholder="Type text…"
+                       onkeydown="if(event.key==='Enter')submitKeyboardText()">
+                <button onclick="submitKeyboardText()" class="btn primary" style="min-width:56px;padding:0.85rem;">
+                    <i data-lucide="send-horizontal"></i>
                 </button>
             </div>
 
-            <!-- Internal Confirmation Overlay -->
-            <div id="confirmOverlay" class="hidden absolute inset-0 bg-zinc-950/95 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200">
-                <h4 class="text-lg font-bold mb-2 uppercase tracking-tight text-white" id="confirmTitle">Confirm Action</h4>
-                <p class="text-sm text-zinc-400 mb-8" id="confirmText">Are you sure you want to proceed?</p>
-                <div class="flex w-full gap-4">
-                    <button onclick="cancelAction()" class="btn btn-secondary flex-grow py-4 uppercase tracking-widest text-xs">Cancel</button>
-                    <button onclick="executeAction()" class="btn btn-primary flex-grow py-4 uppercase tracking-widest text-xs" id="confirmBtn">Confirm</button>
+            <div class="section-label">NAV · EDIT</div>
+            <div class="key-grid cols-4">
+                <button onclick="sendKey('enter')" class="key accent">ENTER</button>
+                <button onclick="sendKey('backspace')" class="key">BS</button>
+                <button onclick="sendKey('tab')" class="key">TAB</button>
+                <button onclick="sendKey('escape')" class="key">ESC</button>
+                <button onclick="sendKey('up')" class="key"><i data-lucide="chevron-up"></i></button>
+                <button onclick="sendKey('down')" class="key"><i data-lucide="chevron-down"></i></button>
+                <button onclick="sendKey('left')" class="key"><i data-lucide="chevron-left"></i></button>
+                <button onclick="sendKey('right')" class="key"><i data-lucide="chevron-right"></i></button>
+                <button onclick="sendKey('space')" class="key wide-2">SPACE</button>
+                <button onclick="pasteIntoWindow()" class="key wide-2 accent">
+                    <i data-lucide="clipboard-paste"></i>PASTE
+                </button>
+            </div>
+
+            <div class="section-label">SHORTCUTS</div>
+            <div class="key-grid cols-4">
+                <button onclick="sendHotkey('c', ['control'])" class="key">⌃ C</button>
+                <button onclick="sendHotkey('v', ['control'])" class="key">⌃ V</button>
+                <button onclick="sendHotkey('x', ['control'])" class="key">⌃ X</button>
+                <button onclick="sendHotkey('z', ['control'])" class="key">⌃ Z</button>
+                <button onclick="sendHotkey('a', ['control'])" class="key">⌃ A</button>
+                <button onclick="sendHotkey('s', ['control'])" class="key">⌃ S</button>
+                <button onclick="sendHotkey('f', ['control'])" class="key">⌃ F</button>
+                <button onclick="sendHotkey('f4', ['alt'])" class="key danger">⌥ F4</button>
+            </div>
+
+            <div class="section-label">FUNCTION</div>
+            <div class="key-grid cols-6">
+                <button onclick="sendKey('f1')" class="key">F1</button>
+                <button onclick="sendKey('f2')" class="key">F2</button>
+                <button onclick="sendKey('f3')" class="key">F3</button>
+                <button onclick="sendKey('f4')" class="key">F4</button>
+                <button onclick="sendKey('f5')" class="key">F5</button>
+                <button onclick="sendKey('f6')" class="key">F6</button>
+                <button onclick="sendKey('f7')" class="key">F7</button>
+                <button onclick="sendKey('f8')" class="key">F8</button>
+                <button onclick="sendKey('f9')" class="key">F9</button>
+                <button onclick="sendKey('f10')" class="key">F10</button>
+                <button onclick="sendKey('f11')" class="key">F11</button>
+                <button onclick="sendKey('f12')" class="key">F12</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage window modal -->
+    <div id="manageModal" class="modal-overlay hidden" onclick="if(event.target===this)closeManageModal()">
+        <div class="modal" style="max-width:500px;">
+            <div class="modal-handle"></div>
+            <div class="modal-head">
+                <div class="modal-title" id="manageModalTitle">MANAGE WINDOW</div>
+                <button onclick="closeManageModal()" class="btn icon"><i data-lucide="x"></i></button>
+            </div>
+
+            <div class="section-label">VISIBILITY · STATE</div>
+            <div class="key-grid cols-3">
+                <button onclick="focusWindow(window.currentHandle)" class="key tall accent">
+                    <i data-lucide="eye"></i>FOCUS
+                </button>
+                <button onclick="maximizeWindow(window.currentHandle)" class="key tall">
+                    <i data-lucide="maximize-2"></i>MAX
+                </button>
+                <button onclick="minimizeWindow(window.currentHandle)" class="key tall">
+                    <i data-lucide="minimize-2"></i>MIN
+                </button>
+            </div>
+
+            <div class="section-label">Z-ORDER</div>
+            <div class="key-grid" style="grid-template-columns:1fr 1fr;">
+                <button onclick="raiseWindow(window.currentHandle)" class="key tall accent">
+                    <i data-lucide="chevrons-up"></i>BRING TO FRONT
+                </button>
+                <button onclick="lowerWindow(window.currentHandle)" class="key tall">
+                    <i data-lucide="chevrons-down"></i>SEND TO BACK
+                </button>
+            </div>
+
+            <div class="section-label">LAYOUT · DISPLAY</div>
+            <button onclick="snapWindow(window.currentHandle, 'next-monitor')" class="btn primary full" style="margin-bottom:0.5rem;">
+                <i data-lucide="monitor-check"></i>MOVE TO OTHER MONITOR
+            </button>
+            <div class="key-grid cols-5" style="background:rgba(0,0,0,0.28);padding:0.5rem;border-radius:2px;">
+                <button onclick="snapWindow(window.currentHandle, 'top-left')" class="key" aria-label="Top left">
+                    <i data-lucide="arrow-up-left"></i>
+                </button>
+                <button onclick="snapWindow(window.currentHandle, 'top-right')" class="key" aria-label="Top right">
+                    <i data-lucide="arrow-up-right"></i>
+                </button>
+                <button onclick="snapWindow(window.currentHandle, 'bottom-left')" class="key" aria-label="Bottom left">
+                    <i data-lucide="arrow-down-left"></i>
+                </button>
+                <button onclick="snapWindow(window.currentHandle, 'bottom-right')" class="key" aria-label="Bottom right">
+                    <i data-lucide="arrow-down-right"></i>
+                </button>
+                <button onclick="snapWindow(window.currentHandle, 'full')" class="key accent" aria-label="Fullscreen">
+                    <i data-lucide="maximize"></i>
+                </button>
+            </div>
+
+            <div class="section-label">DANGER ZONE</div>
+            <button onclick="closeWindow(window.currentHandle); closeManageModal();" class="btn danger full">
+                <i data-lucide="x-octagon"></i>TERMINATE PROCESS
+            </button>
+        </div>
+    </div>
+
+    <!-- Mouse modal -->
+    <div id="mouseModal" class="modal-overlay hidden" onclick="if(event.target===this)closeMouseModal()">
+        <div class="modal" style="max-width:500px;">
+            <div class="modal-handle"></div>
+            <div class="modal-head">
+                <div class="modal-title">MOUSE · CONTROL</div>
+                <button onclick="closeMouseModal()" class="btn icon"><i data-lucide="x"></i></button>
+            </div>
+
+            <div id="trackpad">
+                <span class="hint">SWIPE · TO · MOVE</span>
+                <span id="crosshair" class="trackpad-crosshair">+</span>
+            </div>
+
+            <div class="section-label">CLICK</div>
+            <div class="key-grid cols-3">
+                <button onclick="mouseClick('left')" class="key tall">LEFT</button>
+                <button onclick="mouseClick('center')" class="key tall">MID</button>
+                <button onclick="mouseClick('right')" class="key tall">RIGHT</button>
+            </div>
+
+            <div class="section-label">SCROLL</div>
+            <div class="key-grid" style="grid-template-columns:1fr 1fr;">
+                <button onclick="mouseScroll(0, 5)" class="key tall"><i data-lucide="chevron-up"></i>UP</button>
+                <button onclick="mouseScroll(0, -5)" class="key tall"><i data-lucide="chevron-down"></i>DOWN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- System modal -->
+    <div id="systemModal" class="modal-overlay hidden" onclick="if(event.target===this)closeSystemModal()">
+        <div class="modal" style="max-width:480px;overflow:hidden;position:relative;">
+            <div class="modal-handle"></div>
+            <div class="modal-head">
+                <div class="modal-title">OS · CONTROL</div>
+                <button onclick="closeSystemModal()" class="btn icon"><i data-lucide="x"></i></button>
+            </div>
+
+            <div class="system-grid">
+                <button onclick="requestAction('shutdown')" class="sys-btn shutdown">
+                    <i data-lucide="power"></i>SHUTDOWN
+                </button>
+                <button onclick="requestAction('restart')" class="sys-btn restart">
+                    <i data-lucide="rotate-ccw"></i>RESTART
+                </button>
+                <button onclick="requestAction('sleep')" class="sys-btn sleep">
+                    <i data-lucide="moon-star"></i>SLEEP
+                </button>
+                <button onclick="requestAction('lock')" class="sys-btn lock">
+                    <i data-lucide="lock-keyhole"></i>LOCK PC
+                </button>
+                <button onclick="requestAction('quit')" class="sys-btn quit-atlas" style="grid-column:span 2; min-height:72px; flex-direction:row;">
+                    <i data-lucide="plane-takeoff"></i>QUIT ATLAS PILOT
+                </button>
+            </div>
+
+            <div id="confirmOverlay" class="hidden">
+                <div class="caution-tag">
+                    <i data-lucide="triangle-alert"></i>
+                    <span>CAUTION</span>
+                </div>
+                <div>
+                    <div class="confirm-title" id="confirmTitle">CONFIRM ACTION</div>
+                    <div class="confirm-text" id="confirmText" style="margin-top:0.65rem;">
+                        Are you sure?
+                    </div>
+                </div>
+                <div class="confirm-row">
+                    <button onclick="cancelAction()" class="btn ghost">CANCEL</button>
+                    <button onclick="executeAction()" class="btn danger" id="confirmBtn">CONFIRM</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="false"></div>
 
     <script>
-        let currentHandle = null;
-        let pendingAction = null;
+    (function(){
+        'use strict';
 
-        async function refreshWindows() {
-            const list = document.getElementById('windowList');
+        // ═══════════════ STATE ═══════════════
+        // These must live on `window` because inline onclick="focusWindow(window.currentHandle)"
+        // handlers resolve identifiers against the global scope, not our IIFE closure.
+        window.currentHandle = null;
+        window.pendingAction = null;
+
+        // ═══════════════ UTIL ═══════════════
+        function escapeHtml(s) {
+            return String(s).replace(/[<>&"']/g, c => ({
+                '<':'&lt;', '>':'&gt;', '&':'&amp;', '"':'&quot;', "'":'&#39;'
+            }[c]));
+        }
+        function escapeAttr(s) { return escapeHtml(s); }
+        function jsEscape(s) { return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+
+        // ═══════════════ TOAST ═══════════════
+        const toastStack = document.getElementById('toastStack');
+        function showToast({ level = 'error', title, msg, ttl = 4000 }) {
+            const el = document.createElement('div');
+            el.className = 'toast' + (level === 'warn' ? ' warn' : level === 'info' ? ' info' : '');
+            const iconName = level === 'warn' ? 'triangle-alert'
+                            : level === 'info' ? 'info'
+                            : 'octagon-alert';
+            el.innerHTML = `
+                <i class="toast-icon" data-lucide="${iconName}"></i>
+                <div class="toast-body">
+                    <div class="toast-title"></div>
+                    <div class="toast-msg"></div>
+                </div>
+            `;
+            el.querySelector('.toast-title').textContent = title || '';
+            el.querySelector('.toast-msg').textContent = msg || '';
+            toastStack.appendChild(el);
+            try { lucide.createIcons(); } catch(_) {}
+
+            let dismissed = false;
+            const close = () => {
+                if (dismissed) return;
+                dismissed = true;
+                el.classList.add('out');
+                setTimeout(() => el.remove(), 180);
+            };
+            el.addEventListener('click', close);
+            setTimeout(close, ttl);
+        }
+        const toast = {
+            error: (msg, opts = {}) => showToast({ level: 'error', title: opts.title || 'REQUEST FAILED', msg, ttl: opts.ttl }),
+            warn:  (msg, opts = {}) => showToast({ level: 'warn',  title: opts.title || 'WARNING',         msg, ttl: opts.ttl }),
+            info:  (msg, opts = {}) => showToast({ level: 'info',  title: opts.title || 'NOTICE',          msg, ttl: opts.ttl }),
+        };
+
+        // ═══════════════ API WRAPPER (10s timeout) ═══════════════
+        async function api(url, init = {}, opts = {}) {
+            const { silent = false, timeoutMs = 10000 } = opts;
+            const ctl = new AbortController();
+            const to = setTimeout(() => ctl.abort(), timeoutMs);
             try {
-                const response = await fetch('/api/windows');
-                const windows = await response.json();
-                if (windows.length === 0) {
-                    list.innerHTML = `<div style="text-align: center; padding: 5rem 0; color: #3f3f46;"><i data-lucide="monitor-off" style="width: 48px; height: 48px; opacity: 0.2; margin-bottom: 1rem;"></i><p class="text-sm">No active windows</p></div>`;
-                    lucide.createIcons(); return;
+                const res = await fetch(url, Object.assign({}, init, { signal: ctl.signal }));
+                clearTimeout(to);
+                if (!res.ok && !silent) {
+                    const title = res.status >= 500 ? 'SERVER ERROR'
+                                : res.status === 408 ? 'TIMEOUT'
+                                : 'REQUEST ERROR';
+                    toast.error(url + ' — ' + res.status + ' ' + (res.statusText || ''), { title });
                 }
-                windows.sort((a, b) => (a.controllable === b.controllable) ? a.title.localeCompare(b.title) : (a.controllable ? -1 : 1));
-                list.innerHTML = windows.map(win => `
-                    <div class="glass-card p-5" style="border-color: rgba(39, 39, 42, 0.5);">
-                        <div class="flex flex-col gap-5">
-                            <div class="flex items-center justify-between gap-4">
-                                <div class="flex items-center min-w-0 grow">
-                                    <div class="status-pulse shrink-0" style="width: 8px; height: 8px; margin-right: 0.75rem; background: ${win.controllable ? 'var(--success)' : '#3f3f46'};"></div>
-                                    <span class="font-bold truncate text-xs uppercase tracking-wide" style="color: #f4f4f5;">${win.title}</span>
-                                </div>
-                                <div class="flex gap-2">
-                                    ${win.controllable ? `<button onclick="openManageModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" style="background:none;border:none;cursor:pointer;color:#52525b;"><i data-lucide="settings" style="width: 18px; height: 18px;"></i></button>` : ''}
-                                    <button onclick="closeWindow('${win.handle}')" style="background:none;border:none;cursor:pointer;color:#52525b;"><i data-lucide="x-circle" style="width: 18px; height: 18px;"></i></button>
-                                </div>
+                return res;
+            } catch (e) {
+                clearTimeout(to);
+                if (!silent) {
+                    if (e.name === 'AbortError') {
+                        toast.error('Request timed out — check connection', { title: 'TIMEOUT' });
+                    } else {
+                        toast.error(e.message || 'Network error', { title: 'REQUEST FAILED' });
+                    }
+                }
+                throw e;
+            }
+        }
+        async function apiJson(url, body, opts = {}) {
+            return api(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body || {}),
+            }, opts);
+        }
+        // Swallow throws so call sites don't need try/catch everywhere.
+        async function fireApiJson(url, body, opts = {}) {
+            try { return await apiJson(url, body, opts); } catch (_) { return null; }
+        }
+
+        // ═══════════════ CONNECTION BADGE ═══════════════
+        function computeConnection() {
+            const online = navigator.onLine;
+            if (!online) return { label: 'OFFLINE', icon: 'wifi-off', offline: true };
+
+            const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (!conn) return { label: 'ONLINE', icon: 'globe', offline: false };
+
+            const t = conn.type;
+            const et = (conn.effectiveType || '').toUpperCase();
+            if (t === 'wifi')      return { label: 'WI-FI',     icon: 'wifi',      offline: false };
+            if (t === 'ethernet')  return { label: 'ETHERNET',  icon: 'cable',     offline: false };
+            if (t === 'cellular')  return { label: et ? 'CELL · ' + et : 'CELLULAR', icon: 'signal', offline: false };
+            if (t === 'bluetooth') return { label: 'BLUETOOTH', icon: 'bluetooth', offline: false };
+            if (t === 'wimax')     return { label: 'WIMAX',     icon: 'radio',     offline: false };
+            if (t === 'none')      return { label: 'NO NETWORK', icon: 'wifi-off', offline: true };
+            return { label: 'ONLINE', icon: 'globe', offline: false };
+        }
+        function renderConnection() {
+            const { label, icon, offline } = computeConnection();
+            const cell = document.getElementById('signalCell');
+            cell.classList.toggle('offline', offline);
+            cell.innerHTML = `
+                <span class="signal-dot${offline ? ' offline' : ''}"></span>
+                <i data-lucide="${icon}"></i>
+                <span>${escapeHtml(label)}</span>
+            `;
+            try { lucide.createIcons(); } catch(_) {}
+        }
+
+        // ═══════════════ CLOCK ═══════════════
+        function tickClock() {
+            const d = new Date();
+            const p = n => String(n).padStart(2, '0');
+            document.getElementById('clock').textContent =
+                p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+        }
+
+        // ═══════════════ VOLUME ═══════════════
+        window.onVolumeInput = function(el) {
+            const pct = el.value;
+            document.getElementById('volumeVal').textContent = pct + '%';
+            el.style.setProperty('--val', pct + '%');
+        };
+        window.setVolume = async function(level) {
+            await fireApiJson('/api/volume', { level: parseInt(level, 10) });
+        };
+
+        // ═══════════════ REFRESH WINDOWS ═══════════════
+        window.refreshWindows = async function(silent = false) {
+            const list = document.getElementById('windowList');
+            let wins;
+            try {
+                const res = await api('/api/windows', {}, { silent });
+                if (!res || !res.ok) return;
+                wins = await res.json();
+            } catch (_) { return; }
+
+            if (!wins || wins.length === 0) {
+                list.innerHTML = '<div class="empty-state">NO ACTIVE WINDOWS</div>';
+                try { lucide.createIcons(); } catch(_) {}
+                return;
+            }
+            wins.sort((a, b) =>
+                (a.controllable === b.controllable)
+                    ? a.title.localeCompare(b.title)
+                    : (a.controllable ? -1 : 1)
+            );
+
+            list.innerHTML = wins.map(win => {
+                const safeTitle = escapeHtml(win.title);
+                const jsHandle = jsEscape(win.handle);
+                const jsTitle = jsEscape(win.title);
+                const hex = '0x' + (parseInt(win.handle, 10) || 0).toString(16).toUpperCase().padStart(4, '0');
+                const on = !!win.controllable;
+                return `
+                    <div class="target-card"${on ? '' : ' data-off'}>
+                        <div class="target-head">
+                            <div class="target-title">${safeTitle}</div>
+                            <div class="target-meta">${hex}</div>
+                            <div class="target-actions">
+                                ${on ? `<button onclick="openManageModal('${jsHandle}', '${jsTitle}')" class="btn icon" aria-label="Manage"><i data-lucide="settings-2"></i></button>` : ''}
+                                <button onclick="closeWindow('${jsHandle}')" class="btn icon" aria-label="Close"><i data-lucide="x"></i></button>
                             </div>
-                            ${win.controllable ? `
-                            <div class="flex gap-2" style="flex-wrap: wrap;">
-                                <button onclick="openKeyboardModal('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest gap-2 grow" style="font-size: 9px;"><i data-lucide="keyboard" style="width: 12px; height: 12px;"></i> Type</button>
-                                <button onclick="quickPaste('${win.handle}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest gap-2 grow" style="font-size: 9px; color: var(--success);"><i data-lucide="clipboard-paste" style="width: 12px; height: 12px;"></i> Paste</button>
-                                <button onclick="takeScreenshot('${win.handle}', '${win.title.replace(/'/g, "\\'")}')" class="btn btn-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest grow" style="font-size: 9px; color: var(--success);"><i data-lucide="camera" style="width: 12px; height: 12px; margin-right: 4px;"></i> SS</button>
-                            </div>` : ''}
                         </div>
+                        ${on ? `
+                        <div class="target-tools">
+                            <button onclick="openKeyboardModal('${jsHandle}', '${jsTitle}')" class="key"><i data-lucide="keyboard"></i>TYPE</button>
+                            <button onclick="quickPaste('${jsHandle}')" class="key accent"><i data-lucide="clipboard-paste"></i>PASTE</button>
+                            <button onclick="takeScreenshot('${jsHandle}', '${jsTitle}')" class="key"><i data-lucide="camera"></i>SS</button>
+                        </div>` : ''}
                     </div>
-                `).join('');
-                lucide.createIcons();
-            } catch (error) { console.error(error); }
+                `;
+            }).join('');
+            try { lucide.createIcons(); } catch(_) {}
+        };
+
+        // ═══════════════ MODALS ═══════════════
+        function showModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            try { lucide.createIcons(); } catch(_) {}
         }
+        function hideModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+        window.openKeyboardModal = function(handle, title) {
+            window.currentHandle = handle;
+            document.getElementById('keyboardModalTitle').textContent = title;
+            showModal('keyboardModal');
+        };
+        window.closeKeyboardModal = function() { hideModal('keyboardModal'); window.currentHandle = null; };
+        window.openManageModal = function(handle, title) {
+            window.currentHandle = handle;
+            document.getElementById('manageModalTitle').textContent = title;
+            showModal('manageModal');
+        };
+        window.closeManageModal = function() { hideModal('manageModal'); window.currentHandle = null; };
+        window.openMouseModal = function() { showModal('mouseModal'); initTrackpad(); };
+        window.closeMouseModal = function() { hideModal('mouseModal'); };
+        window.openSystemModal = function() { showModal('systemModal'); cancelAction(); };
+        window.closeSystemModal = function() { hideModal('systemModal'); };
+        window.closeScreenshotModal = function() { hideModal('screenshotModal'); };
 
-        // --- Modals ---
-        function openKeyboardModal(handle, title) { currentHandle = handle; document.getElementById('keyboardModalTitle').innerText = title; document.getElementById('keyboardModal').classList.remove('hidden'); lucide.createIcons(); }
-        function closeKeyboardModal() { document.getElementById('keyboardModal').classList.add('hidden'); currentHandle = null; }
-        function openManageModal(handle, title) { currentHandle = handle; document.getElementById('manageModalTitle').innerText = title; document.getElementById('manageModal').classList.remove('hidden'); lucide.createIcons(); }
-        function closeManageModal() { document.getElementById('manageModal').classList.add('hidden'); currentHandle = null; }
-        function openMouseModal() { document.getElementById('mouseModal').classList.remove('hidden'); lucide.createIcons(); initTrackpad(); }
-        function closeMouseModal() { document.getElementById('mouseModal').classList.add('hidden'); }
-        function openSystemModal() { document.getElementById('systemModal').classList.remove('hidden'); lucide.createIcons(); cancelAction(); }
-        function closeSystemModal() { document.getElementById('systemModal').classList.add('hidden'); }
+        // Close any modal on Escape.
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            const open = document.querySelector('.modal-overlay:not(.hidden)');
+            if (open) open.classList.add('hidden');
+        });
 
-        // --- System Actions with Internal Confirmation ---
-        function requestAction(action) {
-            pendingAction = action;
-            const overlay = document.getElementById('confirmOverlay');
-            const title = document.getElementById('confirmTitle');
-            const text = document.getElementById('confirmText');
+        // ═══════════════ SYSTEM ACTIONS ═══════════════
+        const actionMessages = {
+            shutdown: 'You are about to shutdown the computer.',
+            restart:  'You are about to restart the computer.',
+            sleep:    'You are about to put the computer to sleep.',
+            lock:     'You are about to lock the computer.',
+            quit:     'Quit Atlas Pilot on the PC. This phone will lose connection.',
+        };
+        const actionTitles = {
+            shutdown: 'CONFIRM · SHUTDOWN',
+            restart:  'CONFIRM · RESTART',
+            sleep:    'CONFIRM · SLEEP',
+            lock:     'CONFIRM · LOCK',
+            quit:     'CONFIRM · QUIT PILOT',
+        };
+        window.requestAction = function(action) {
+            window.pendingAction = action;
+            document.getElementById('confirmTitle').textContent =
+                actionTitles[action] || ('CONFIRM · ' + action.toUpperCase());
+            document.getElementById('confirmText').textContent =
+                actionMessages[action] || ('You are about to ' + action + '.');
             const btn = document.getElementById('confirmBtn');
-            
-            title.innerText = `Confirm ${action.toUpperCase()}`;
-            text.innerText = `Are you absolutely sure you want to ${action} the computer?`;
-            
-            overlay.classList.remove('hidden');
-        }
-
-        function cancelAction() {
+            btn.classList.remove('primary', 'danger', 'ghost');
+            if (action === 'shutdown' || action === 'restart') btn.classList.add('danger');
+            else btn.classList.add('primary');
+            document.getElementById('confirmOverlay').classList.remove('hidden');
+            try { lucide.createIcons(); } catch(_) {}
+        };
+        window.cancelAction = function() {
             document.getElementById('confirmOverlay').classList.add('hidden');
-            pendingAction = null;
-        }
-
-        async function executeAction() {
-            if (!pendingAction) return;
-            await fetch(`/api/${pendingAction}`, { method: 'POST' });
+            window.pendingAction = null;
+        };
+        window.executeAction = async function() {
+            if (!window.pendingAction) return;
+            await api('/api/' + window.pendingAction, { method: 'POST' }).catch(() => {});
             closeSystemModal();
+        };
+
+        // ═══════════════ WINDOW ACTIONS ═══════════════
+        window.focusWindow    = async (h) => { if (!h) return; await fireApiJson('/api/focus',    { handle: h }); };
+        window.maximizeWindow = async (h) => { if (!h) return; await fireApiJson('/api/maximize', { handle: h }); };
+        window.minimizeWindow = async (h) => { if (!h) return; await fireApiJson('/api/minimize', { handle: h }); };
+        window.raiseWindow    = async (h) => { if (!h) return; await fireApiJson('/api/raise',    { handle: h }); };
+        window.lowerWindow    = async (h) => { if (!h) return; await fireApiJson('/api/lower',    { handle: h }); };
+        window.snapWindow = async function(h, position) {
+            if (!h) return;
+            await fireApiJson('/api/snap', { handle: h, position });
+            if (position === 'next-monitor') setTimeout(() => refreshWindows(true), 500);
+        };
+        window.closeWindow = async function(h) {
+            if (!h) return;
+            if (!confirm('Terminate this window?')) return;
+            await fireApiJson('/api/close', { handle: h });
+            setTimeout(() => refreshWindows(true), 500);
+        };
+
+        // ═══════════════ KEYBOARD INPUT ═══════════════
+        window.submitKeyboardText = async function() {
+            const input = document.getElementById('keyboardInput');
+            if (!input.value || !window.currentHandle) return;
+            await fireApiJson('/api/type', { handle: window.currentHandle, text: input.value });
+            input.value = '';
+        };
+        window.sendKey = async function(key) {
+            await fireApiJson('/api/key', { handle: window.currentHandle || '', key });
+        };
+        window.sendHotkey = async function(key, modifiers) {
+            await fireApiJson('/api/hotkey', { handle: window.currentHandle || '', key, modifiers });
+        };
+        window.pasteIntoWindow = async function() {
+            if (!window.currentHandle) return;
+            await setClipboard();
+            await fireApiJson('/api/paste', { handle: window.currentHandle });
+        };
+        window.quickPaste = async function(handle) {
+            window.currentHandle = handle;
+            await pasteIntoWindow();
+            window.currentHandle = null;
+        };
+
+        // ═══════════════ CLIPBOARD ═══════════════
+        window.getClipboard = async function() {
+            try {
+                const res = await api('/api/clipboard/get');
+                if (!res || !res.ok) return;
+                const data = await res.json();
+                document.getElementById('clipboardArea').value = data.text || '';
+            } catch (_) {}
+        };
+        window.setClipboard = async function() {
+            await fireApiJson('/api/clipboard/set', {
+                text: document.getElementById('clipboardArea').value
+            });
+        };
+
+        // ═══════════════ LAUNCH APP ═══════════════
+        window.openApp = async function() {
+            const cmd = document.getElementById('openCommand').value;
+            if (!cmd) return;
+            await fireApiJson('/api/open', { command: cmd });
+            document.getElementById('openCommand').value = '';
+            setTimeout(() => refreshWindows(true), 1000);
+        };
+
+        // ═══════════════ SCREENSHOT ═══════════════
+        window.takeScreenshot = function(handle, title) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('screenshotImg').src =
+                '/api/screenshot?handle=' + encodeURIComponent(handle) + '&t=' + Date.now();
+            showModal('screenshotModal');
+        };
+
+        // ═══════════════ MOUSE CLICK / SCROLL ═══════════════
+        window.mouseClick = async function(button) {
+            await fireApiJson('/api/mouse/click', { button, double: false });
+        };
+        window.mouseScroll = async function(x, y) {
+            await fireApiJson('/api/mouse/scroll', { x, y });
+        };
+
+        // ═══════════════ TRACKPAD ═══════════════
+        let trackpadInited = false;
+        let lastMouseToastAt = 0;
+        function noteMouseFailure() {
+            const now = Date.now();
+            if (now - lastMouseToastAt >= 3000) {
+                lastMouseToastAt = now;
+                toast.warn('Cursor updates dropping — check connection', { title: 'MOUSE SYNC' });
+            }
         }
+        window.initTrackpad = function() {
+            if (trackpadInited) return;
+            trackpadInited = true;
 
-        // --- Window Actions ---
-        async function maximizeWindow(handle) { if(!handle) return; await fetch('/api/maximize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
-        async function minimizeWindow(handle) { if(!handle) return; await fetch('/api/minimize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
-        async function focusWindow(handle) { if(!handle) return; await fetch('/api/focus', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); }
-        async function snapWindow(handle, position) { if(!handle) return; await fetch('/api/snap', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle, position }) }); if (position === 'next-monitor') setTimeout(refreshWindows, 500); }
-        async function closeWindow(handle) { if(!handle) return; if (confirm('Terminate?')) { await fetch('/api/close', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle }) }); setTimeout(refreshWindows, 500); } }
-        async function submitKeyboardText() { const input = document.getElementById('keyboardInput'); if (!input.value || !currentHandle) return; await fetch('/api/type', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle, text: input.value }) }); input.value = ''; }
-        async function sendKey(key) { await fetch('/api/key', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle || "", key }) }); }
-        async function sendHotkey(key, modifiers) { await fetch('/api/hotkey', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle || "", key, modifiers }) }); }
-        async function pasteIntoWindow() { if (!currentHandle) return; await setClipboard(); await fetch('/api/paste', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ handle: currentHandle }) }); }
-        async function quickPaste(handle) { currentHandle = handle; await pasteIntoWindow(); currentHandle = null; }
-
-        function initTrackpad() {
             const pad = document.getElementById('trackpad');
+            const cross = document.getElementById('crosshair');
+            const SENS = 2.2;
             let lastX = 0, lastY = 0, isMoving = false;
-            pad.addEventListener('touchstart', (e) => { lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; isMoving = true; });
+            let pendingDx = 0, pendingDy = 0, flushScheduled = false;
+
+            function placeCrosshair(clientX, clientY) {
+                const rect = pad.getBoundingClientRect();
+                cross.style.left = (clientX - rect.left) + 'px';
+                cross.style.top  = (clientY - rect.top) + 'px';
+                cross.classList.add('active');
+                const px = ((clientX - rect.left) / rect.width) * 100;
+                const py = ((clientY - rect.top)  / rect.height) * 100;
+                pad.style.setProperty('--px', px + '%');
+                pad.style.setProperty('--py', py + '%');
+            }
+            function hideCrosshair() { cross.classList.remove('active'); }
+
+            function flush() {
+                flushScheduled = false;
+                if (pendingDx === 0 && pendingDy === 0) return;
+                const dx = pendingDx, dy = pendingDy;
+                pendingDx = 0; pendingDy = 0;
+                const ctl = new AbortController();
+                const to = setTimeout(() => ctl.abort(), 10000);
+                fetch('/api/mouse/move', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dx, dy }),
+                    keepalive: true,
+                    signal: ctl.signal,
+                })
+                    .then(res => { clearTimeout(to); if (!res.ok) noteMouseFailure(); })
+                    .catch(() => { clearTimeout(to); noteMouseFailure(); });
+            }
+
+            pad.addEventListener('touchstart', (e) => {
+                const t = e.touches[0];
+                lastX = t.clientX; lastY = t.clientY;
+                isMoving = true;
+                placeCrosshair(t.clientX, t.clientY);
+            }, { passive: true });
+
             pad.addEventListener('touchmove', (e) => {
                 if (!isMoving) return;
-                const dx = Math.round((e.touches[0].clientX - lastX) * 2.5);
-                const dy = Math.round((e.touches[0].clientY - lastY) * 2.5);
-                if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-                    fetch('/api/mouse/move', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ dx, dy }) });
-                    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+                if (e.cancelable) e.preventDefault();
+                const t = e.touches[0];
+                pendingDx += Math.round((t.clientX - lastX) * SENS);
+                pendingDy += Math.round((t.clientY - lastY) * SENS);
+                lastX = t.clientX; lastY = t.clientY;
+                placeCrosshair(t.clientX, t.clientY);
+                if (!flushScheduled) {
+                    flushScheduled = true;
+                    requestAnimationFrame(flush);
                 }
-            });
-            pad.addEventListener('touchend', () => { isMoving = false; });
-        }
-        async function mouseClick(button) { await fetch('/api/mouse/click', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ button, double: false }) }); }
-        async function mouseScroll(x, y) { await fetch('/api/mouse/scroll', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ x, y }) }); }
-        async function takeScreenshot(handle, title) { const img = document.getElementById('screenshotImg'); const modal = document.getElementById('screenshotModal'); document.getElementById('modalTitle').innerText = title; img.src = `/api/screenshot?handle=${handle}&t=${Date.now()}`; modal.classList.remove('hidden'); }
-        function closeScreenshotModal() { document.getElementById('screenshotModal').classList.add('hidden'); }
-        async function getClipboard() { try { const res = await fetch('/api/clipboard/get'); const data = await res.json(); document.getElementById('clipboardArea').value = data.text; } catch (e) { console.error(e); } }
-        async function setClipboard() { await fetch('/api/clipboard/set', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ text: document.getElementById('clipboardArea').value }) }); }
-        async function openApp() { const cmd = document.getElementById('openCommand').value; if (!cmd) return; await fetch('/api/open', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ command: cmd }) }); document.getElementById('openCommand').value = ''; setTimeout(refreshWindows, 1000); }
-        async function setVolume(level) { await fetch('/api/volume', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ level: parseInt(level) }) }); }
+            }, { passive: false });
 
-        refreshWindows();
-        lucide.createIcons();
-        setInterval(refreshWindows, 15000);
+            pad.addEventListener('touchend', () => {
+                isMoving = false; flush();
+                setTimeout(hideCrosshair, 320);
+            }, { passive: true });
+            pad.addEventListener('touchcancel', () => {
+                isMoving = false; pendingDx = 0; pendingDy = 0; hideCrosshair();
+            }, { passive: true });
+        };
+
+        // ═══════════════ HAPTIC ON TAP ═══════════════
+        (function installHaptic() {
+            const canVibrate = 'vibrate' in navigator;
+            if (!canVibrate) return;
+            document.addEventListener('pointerdown', (e) => {
+                const btn = e.target.closest('.btn, .key, .sys-btn, button');
+                if (!btn) return;
+                try { navigator.vibrate(10); } catch (_) {}
+            }, { passive: true });
+        })();
+
+        // ═══════════════ INIT ═══════════════
+        renderConnection();
+        const netConn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if (netConn && netConn.addEventListener) netConn.addEventListener('change', renderConnection);
+        window.addEventListener('online',  renderConnection);
+        window.addEventListener('offline', renderConnection);
+
+        tickClock();
+        setInterval(tickClock, 1000);
+
+        // Bootstrap the real master volume from the host; until it answers
+        // the slider stays dimmed and the label reads "--%" (no fake 50).
+        (async function bootstrapVolume() {
+            try {
+                const res = await api('/api/volume', { method: 'GET' }, { silent: true, timeoutMs: 4000 });
+                if (!res || !res.ok) return;
+                const data = await res.json();
+                const slider = document.getElementById('volumeSlider');
+                if (typeof data.level === 'number') {
+                    slider.value = data.level;
+                    onVolumeInput(slider);
+                    slider.removeAttribute('data-loading');
+                }
+            } catch (_) {
+                // leave the slider dimmed; user can still drag to take control
+                document.getElementById('volumeSlider').removeAttribute('data-loading');
+            }
+        })();
+
+        // Silent auto-refresh (won't spam toasts if PC is off); manual refresh button surfaces errors.
+        refreshWindows(true);
+        setInterval(() => refreshWindows(true), 15000);
+
+        try { lucide.createIcons(); } catch(_) {}
+    })();
     </script>
 </body>
 </html>
